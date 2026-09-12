@@ -43,12 +43,18 @@ nav button.active { color:var(--amber); border:1px solid var(--amber); text-shad
 .panel { border:1px solid var(--amber-faint); background:var(--panel); padding:12px; margin-bottom:14px; }
 .panel h2 { font-size:18px; letter-spacing:2px; color:var(--amber-dim); margin-bottom:8px; font-weight:normal; }
 .panel h2::before { content:'['; } .panel h2::after { content:']'; }
-/* bars */
-.bar-row { margin-bottom:10px; }
-.bar-label { display:flex; justify-content:space-between; font-size:17px; margin-bottom:3px; }
-.bar-track { height:18px; border:1px solid var(--amber-faint); position:relative; }
-.bar-fill { height:100%; background:var(--amber); box-shadow:0 0 10px rgba(255,176,0,.7); transition:width .4s; }
-.bar-fill.over { background:var(--ok); box-shadow:0 0 10px rgba(51,255,102,.7); }
+/* segmented bars — sharp blocks, red->green by progress */
+.bar-row { margin-bottom:12px; }
+.bar-label { display:flex; justify-content:space-between; font-size:17px; margin-bottom:4px; }
+.bar-label .bl-pct { color:var(--amber-dim); }
+.bar-segs { display:flex; gap:3px; height:22px; }
+.bar-segs .seg { flex:1; background:rgba(255,176,0,.07); border:1px solid rgba(255,176,0,.18); }
+.bar-segs .seg.lit { border-color:transparent; box-shadow:0 0 6px currentColor; }
+.seg-c0 { color:#ff2a2a; background:#ff2a2a; } /* red */
+.seg-c1 { color:#ff7a1a; background:#ff7a1a; } /* orange */
+.seg-c2 { color:#ffd400; background:#ffd400; } /* yellow */
+.seg-c3 { color:#9be600; background:#9be600; } /* yellow-green */
+.seg-c4 { color:#33ff66; background:#33ff66; } /* green */
 /* buttons */
 .btn { background:none; border:1px solid var(--amber); color:var(--amber); font-family:inherit; font-size:18px;
   padding:10px 16px; cursor:pointer; letter-spacing:1px; min-height:44px; }
@@ -129,11 +135,11 @@ input::placeholder { color:var(--amber-faint); }
         <h2>TODAY'S TOTALS</h2>
         <div class="bar-row">
           <div class="bar-label"><span>PROTEIN</span><span id="p-val">0/115g</span></div>
-          <div class="bar-track"><div class="bar-fill" id="p-bar" style="width:0%"></div></div>
+          <div class="bar-segs" id="p-segs"></div>
         </div>
         <div class="bar-row" style="margin-bottom:0">
           <div class="bar-label"><span>CALORIES</span><span id="c-val">0/2100</span></div>
-          <div class="bar-track"><div class="bar-fill" id="c-bar" style="width:0%"></div></div>
+          <div class="bar-segs" id="c-segs"></div>
         </div>
       </div>
       <div class="section-title">QUICK ADD (RECENT)</div>
@@ -290,13 +296,32 @@ function showTab(t){
   if(t==='foods') renderDb();
 }
 // ============ LOG TAB ============
+const NSEGS = 20;
+function renderSegs(elId, value, goal) {
+  const box = document.getElementById(elId);
+  const frac = Math.min(1, value / goal);
+  const lit = Math.round(frac * NSEGS);
+  if (box.children.length !== NSEGS) {
+    box.innerHTML = '';
+    for (let i = 0; i < NSEGS; i++) { const s = document.createElement('div'); s.className = 'seg'; box.appendChild(s); }
+  }
+  // color of a lit segment: ramp red(0) -> green(4) by its position in the bar
+  for (let i = 0; i < NSEGS; i++) {
+    const s = box.children[i];
+    if (i < lit) {
+      const c = Math.min(4, Math.floor((i / NSEGS) * 5));
+      s.className = 'seg lit seg-c' + c;
+    } else s.className = 'seg';
+  }
+  return Math.round(frac * 100);
+}
 function renderLog(){
   const t=dayTotals(todayStr());
   const cg=calGoal();
-  document.getElementById('p-val').textContent=`${t.p}/${PRO_GOAL}g`;
-  document.getElementById('c-val').textContent=`${t.c}/${cg}`;
-  const pb=document.getElementById('p-bar'); pb.style.width=Math.min(100,t.p/PRO_GOAL*100)+'%'; pb.classList.toggle('over',t.p>=PRO_GOAL);
-  const cb=document.getElementById('c-bar'); cb.style.width=Math.min(100,t.c/cg*100)+'%'; cb.classList.toggle('over',t.c>=cg);
+  const ppct = renderSegs('p-segs', t.p, PRO_GOAL);
+  const cpct = renderSegs('c-segs', t.c, cg);
+  document.getElementById('p-val').innerHTML=`${t.p}/${PRO_GOAL}g <span class="bl-pct">${ppct}%</span>`;
+  document.getElementById('c-val').innerHTML=`${t.c}/${cg} <span class="bl-pct">${cpct}%</span>`;
   // workout banner
   const wb=document.getElementById('workout-banner');
   const wd=WORKOUT_DAYS[new Date().getDay()];
