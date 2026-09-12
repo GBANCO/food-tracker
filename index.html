@@ -47,18 +47,14 @@ nav button.active { color:var(--amber); border:1px solid var(--amber); text-shad
 .bar-row { margin-bottom:14px; }
 .bar-label { display:flex; justify-content:space-between; font-size:17px; margin-bottom:4px; }
 .bar-label .bl-pct { color:var(--amber-dim); }
-.bar-track { height:24px; background:#120c02; border:1px solid rgba(255,176,0,.25); position:relative; overflow:hidden; }
+.bar-track { height:34px; background:#120c02; border:1px solid rgba(255,176,0,.25); position:relative; overflow:hidden; }
 .bar-grad { position:absolute; left:0; right:0; top:0; bottom:0;
   background:linear-gradient(90deg,#ff2a2a 0%,#ff7a1a 28%,#ffd400 55%,#9be600 78%,#33ff66 100%);
-  box-shadow:inset 0 0 10px rgba(255,255,255,.25); }
+  box-shadow:inset 0 0 12px rgba(255,255,255,.25); }
 /* dark cover over the unfilled part — reveal looks like an LED strip lighting up */
 .bar-cover { position:absolute; right:0; top:0; bottom:0; width:100%; background:#120c02; transition:width .5s ease; }
 /* soft glow bleeding from the lit edge */
 .bar-edge { position:absolute; top:0; bottom:0; width:3px; background:rgba(255,255,255,.9); box-shadow:0 0 12px 4px rgba(255,176,0,.8); transition:left .5s ease; opacity:0; }
-/* LED diode texture — tiny bright dots inside the glow, like a real strip */
-.bar-grad::after { content:''; position:absolute; inset:0;
-  background-image:radial-gradient(circle at center, rgba(255,255,255,.55) 0 1.5px, transparent 2px);
-  background-size:12px 12px; background-position:3px center; opacity:.7; }
 /* glassy top highlight for depth */
 .bar-grad::before { content:''; position:absolute; left:0; right:0; top:0; height:40%;
   background:linear-gradient(180deg, rgba(255,255,255,.28), transparent); }
@@ -121,6 +117,12 @@ input::placeholder { color:var(--amber-faint); }
 .recent-chip { display:inline-block; border:1px solid var(--amber-faint); color:var(--amber-dim); padding:8px 12px;
   margin:0 6px 8px 0; font-size:17px; cursor:pointer; min-height:40px; }
 .recent-chip:active { border-color:var(--amber); color:var(--amber); }
+/* restaurant filter chips */
+.rest-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.rest-chips button { background:none; border:1px solid var(--amber-faint); color:var(--amber-dim); font-family:inherit;
+  font-size:15px; padding:7px 10px; min-height:36px; cursor:pointer; letter-spacing:.5px; }
+.rest-chips button.sel { border-color:var(--amber); color:var(--amber); box-shadow:0 0 6px rgba(255,176,0,.4); text-shadow:0 0 6px rgba(255,176,0,.6); }
+.result .rrest { color:#9be600; font-size:14px; }
 .cursor-blink::after { content:'_'; animation:blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity:0; } }
 .toast { position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom)); transform:translateX(-50%);
@@ -152,6 +154,7 @@ input::placeholder { color:var(--amber-faint); }
       <div class="section-title">QUICK ADD (RECENT)</div>
       <div id="recent-chips"></div>
       <div class="section-title">SEARCH FOOD DB</div>
+      <div class="rest-chips" id="rest-chips"></div>
       <input type="search" id="search" placeholder="> type food name..." autocomplete="off" autocapitalize="off" spellcheck="false">
       <div id="search-results" class="panel" style="margin-top:8px"></div>
       <div class="section-title">TODAY'S LOG</div>
@@ -222,6 +225,7 @@ input::placeholder { color:var(--amber-faint); }
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<script src="dining.js"></script>
 <script>
 'use strict';
 // ============ SEED DATABASE ============
@@ -279,8 +283,19 @@ const SEED_FOODS = [
 ];
 // ============ STORAGE ============
 const KEY=['fu'+'el','da'+'ta','v1'].join('_');
-function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods)return d; }catch(e){} return seed(); }
-function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:1000}; save(d); return d; }
+function mergeDining(d){
+  if (typeof DINING_FOODS === 'undefined') return d;
+  // version-gated merge: refresh official dining items when DINING_VERSION bumps;
+  // never touches entries, weights, custom foods, or recents
+  if (d.diningVer === DINING_VERSION) return d;
+  d.foods = d.foods.filter(f => !(f.src === 'dining'));
+  const ids = new Set(d.foods.map(f => f.id));
+  DINING_FOODS.forEach(f => { const c = Object.assign({}, f); while (ids.has(c.id)) c.id += 100000; ids.add(c.id); d.foods.push(c); });
+  d.diningVer = DINING_VERSION;
+  return d;
+}
+function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods)return mergeDining(d); }catch(e){} return mergeDining(seed()); }
+function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:90000}; save(d); return d; }
 function save(d){ try{ localStorage.setItem(KEY,JSON.stringify(d)); }catch(e){ toast('STORAGE ERROR'); } }
 let DB=load();
 // ============ HELPERS ============
@@ -350,14 +365,26 @@ function delEntry(id){
 }
 // ============ SEARCH ============
 const searchEl=document.getElementById('search');
+let restFilter=null;
+function renderRestChips(){
+  const box=document.getElementById('rest-chips'); box.innerHTML='';
+  const rests = (typeof DINING_RESTAURANTS!=='undefined') ? DINING_RESTAURANTS : [];
+  const mk=(label,val)=>{ const b=document.createElement('button'); b.textContent=label;
+    if(restFilter===val) b.classList.add('sel');
+    b.onclick=()=>{ restFilter=val; renderRestChips(); renderResults(searchEl.value.trim().toLowerCase()); };
+    box.appendChild(b); };
+  mk('ALL',null); rests.forEach(r=>mk(r.toUpperCase(),r));
+}
 searchEl.addEventListener('input',()=>{ renderResults(searchEl.value.trim().toLowerCase()); });
 function renderResults(q){
   const box=document.getElementById('search-results');
-  let list=q? DB.foods.filter(f=>f.n.toLowerCase().includes(q)) : DB.foods.slice(0,8);
+  let pool = restFilter ? DB.foods.filter(f=>f.r===restFilter) : DB.foods;
+  let list=q? pool.filter(f=>f.n.toLowerCase().includes(q)) : pool.slice(0,8);
   box.innerHTML='';
   list.slice(0,20).forEach(f=>{
     const r=document.createElement('div'); r.className='result';
-    r.innerHTML=`<div><div class="rname">${esc(f.n)}</div><div class="rmeta">${f.c} cal · ${f.p}g protein · per ${esc(f.u)}</div></div><span class="radd">[+]</span>`;
+    const rest=f.r?` <span class="rrest">· ${esc(f.r)}</span>`:'';
+    r.innerHTML=`<div><div class="rname">${esc(f.n)}${rest}</div><div class="rmeta">${f.c} cal · ${f.p}g protein · per ${esc(f.u)}</div></div><span class="radd">[+]</span>`;
     r.onclick=()=>openSheet(f.id);
     box.appendChild(r);
   });
@@ -368,7 +395,7 @@ let sheetFoodId=null;
 function openSheet(fid){
   sheetFoodId=fid; const f=DB.foods.find(x=>x.id===fid); if(!f)return;
   document.getElementById('sheet-name').textContent=f.n.toUpperCase();
-  document.getElementById('sheet-meta').textContent=`${f.c} cal · ${f.p}g protein · per ${f.u}`;
+  document.getElementById('sheet-meta').textContent=`${f.c} cal · ${f.p}g protein · per ${f.u}${f.r?' · '+f.r:''}`;
   const presets=document.getElementById('sheet-presets'); presets.innerHTML='';
   [0.5,1,1.5,2,3].forEach(q=>{ const b=document.createElement('button'); b.textContent='×'+q;
     b.onclick=()=>{ document.getElementById('sheet-qty').value=q;
@@ -442,10 +469,11 @@ function renderDb(){
   document.getElementById('food-count').textContent=DB.foods.length;
   const q=(document.getElementById('db-search').value||'').toLowerCase();
   const box=document.getElementById('db-list'); box.innerHTML='';
-  DB.foods.filter(f=>!q||f.n.toLowerCase().includes(q)).forEach(f=>{
+  DB.foods.filter(f=>!q||f.n.toLowerCase().includes(q)||(f.r&&f.r.toLowerCase().includes(q))).slice(0,120).forEach(f=>{
     const row=document.createElement('div'); row.className='entry';
-    row.innerHTML=`<span class="ename">${esc(f.n)}</span><span class="evals">${f.c} cal · ${f.p}g · ${esc(f.u)}</span>`;
-    if(f.id>=1000){ const del=document.createElement('span'); del.className='edel'; del.textContent='✕';
+    const rest=f.r?` <span class="rrest">· ${esc(f.r)}</span>`:'';
+    row.innerHTML=`<span class="ename">${esc(f.n)}${rest}</span><span class="evals">${f.c} cal · ${f.p}g · ${esc(f.u)}</span>`;
+    if(f.id>=1000 && f.src!=='dining'){ const del=document.createElement('span'); del.className='edel'; del.textContent='✕';
       del.onclick=()=>{ if(confirm('DELETE "'+f.n+'"?')){ DB.foods=DB.foods.filter(x=>x.id!==f.id); save(DB); renderDb(); } };
       row.appendChild(del); }
     box.appendChild(row); });
@@ -467,7 +495,7 @@ function importData(inp){
 }
 function resetData(){ if(confirm('WIPE ALL DATA AND RESEED? THIS CANNOT BE UNDONE.')){ DB=seed(); renderLog(); renderDb(); toast('DATA RESET'); } }
 // ============ INIT ============
-renderLog(); renderResults('');
+renderLog(); renderRestChips(); renderResults('');
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
