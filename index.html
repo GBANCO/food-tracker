@@ -7,7 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FUEL">
 <meta name="theme-color" content="#080808">
-<link rel="manifest" href='data:application/manifest+json,{"name":"FUEL://NUTRITION","short_name":"FUEL","display":"standalone","background_color":"%23080808","theme_color":"%23080808","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23080808%27/%3E%3Ctext x=%2750%27 y=%2768%27 font-size=%2760%27 text-anchor=%27middle%27 fill=%27%23FFB000%27%3EF%3C/text%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>FUEL://NUTRITION</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
@@ -444,6 +445,9 @@ function importData(inp){
 function resetData(){ if(confirm('WIPE ALL DATA AND RESEED? THIS CANNOT BE UNDONE.')){ DB=seed(); renderLog(); renderDb(); toast('DATA RESET'); } }
 // ============ INIT ============
 renderLog(); renderResults('');
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 </script>
 </body>
 </html>

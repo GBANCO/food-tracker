@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <rect width="180" height="180" fill="#080808"/>
+  <rect x="6" y="6" width="168" height="168" fill="none" stroke="#FFB000" stroke-width="4"/>
+  <text x="90" y="122" font-family="monospace" font-size="100" font-weight="bold" text-anchor="middle" fill="#FFB000">F</text>
+  <rect x="20" y="146" width="140" height="8" fill="#FFB000" opacity="0.55"/>
+</svg>
