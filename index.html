@@ -128,6 +128,41 @@ input::placeholder { color:var(--amber-faint); }
 .toast { position:fixed; left:50%; bottom:calc(90px + env(safe-area-inset-bottom)); transform:translateX(-50%);
   background:var(--amber); color:var(--bg); padding:10px 20px; font-size:18px; z-index:300; opacity:0; transition:opacity .25s; pointer-events:none; }
 .toast.show { opacity:1; }
+/* onboarding */
+#onboard { position:fixed; inset:0; background:var(--bg); z-index:400; overflow-y:auto; padding:calc(env(safe-area-inset-top) + 24px) 20px calc(24px + env(safe-area-inset-bottom)); }
+#onboard .ob-title { font-size:30px; letter-spacing:2px; text-align:center; margin-bottom:4px; }
+#onboard .ob-sub { color:var(--amber-dim); font-size:16px; text-align:center; margin-bottom:24px; }
+.ob-step { margin-bottom:20px; }
+.ob-step label { display:block; font-size:17px; color:var(--amber-dim); letter-spacing:1px; margin-bottom:6px; }
+.ob-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.ob-grid.three { grid-template-columns:1fr 1fr 1fr; }
+.ob-opt { border:1px solid var(--amber-faint); color:var(--amber-dim); font-family:inherit; font-size:16px;
+  padding:12px 6px; min-height:52px; cursor:pointer; background:none; text-align:center; }
+.ob-opt.sel { border-color:var(--amber); color:var(--amber); background:rgba(255,176,0,.08); box-shadow:0 0 8px rgba(255,176,0,.3); }
+.ob-result { border:1px solid var(--ok); padding:14px; margin:18px 0; display:none; }
+.ob-result.show { display:block; }
+.ob-result .ob-big { font-size:34px; color:var(--ok); text-align:center; text-shadow:0 0 10px rgba(51,255,102,.5); }
+.ob-result .ob-line { display:flex; justify-content:space-between; font-size:17px; padding:4px 0; }
+.ob-note { font-size:14px; color:var(--amber-faint); margin-top:10px; line-height:1.4; }
+/* bug report */
+.seg-toggle { display:flex; border:1px solid var(--amber-faint); margin-bottom:14px; }
+.seg-toggle button { flex:1; background:none; border:none; color:var(--amber-dim); font-family:inherit; font-size:17px;
+  padding:10px 0; min-height:44px; cursor:pointer; letter-spacing:1px; }
+.seg-toggle button.sel { background:var(--amber); color:var(--bg); }
+textarea { background:var(--bg); border:1px solid var(--amber-faint); color:var(--amber); font-family:inherit;
+  font-size:18px; padding:12px; width:100%; min-height:110px; outline:none; resize:vertical; }
+textarea:focus { border-color:var(--amber); }
+textarea::placeholder { color:var(--amber-faint); }
+.br-meta { font-size:14px; color:var(--amber-faint); border:1px dashed var(--amber-faint); padding:8px 10px; margin:10px 0; line-height:1.5; }
+.report { border:1px solid var(--amber-faint); padding:10px; margin-bottom:10px; }
+.report .rp-head { display:flex; justify-content:space-between; font-size:15px; color:var(--amber-dim); margin-bottom:6px; }
+.report .rp-type { border:1px solid; padding:1px 8px; font-size:14px; }
+.rp-type.bug { color:var(--warn); border-color:var(--warn); }
+.rp-type.idea { color:var(--ok); border-color:var(--ok); }
+.rp-type.data { color:#ffd400; border-color:#ffd400; }
+.report .rp-body { font-size:17px; white-space:pre-wrap; }
+.report .rp-status { font-size:14px; color:var(--amber-faint); margin-top:6px; display:flex; justify-content:space-between; align-items:center; }
+.rp-setstatus { background:none; border:1px solid var(--amber-faint); color:var(--amber-dim); font-family:inherit; font-size:14px; padding:4px 8px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -198,6 +233,13 @@ input::placeholder { color:var(--amber-faint); }
         <div id="db-list" style="max-height:40vh;overflow-y:auto"></div>
       </div>
       <div class="panel">
+        <h2>SETTINGS</h2>
+        <div class="stat-line"><span>GOAL</span><span class="sv" id="set-goal">—</span></div>
+        <div class="stat-line"><span>DAILY CALORIES (REST)</span><span class="sv" id="set-cal">—</span></div>
+        <div class="stat-line"><span>PROTEIN TARGET</span><span class="sv" id="set-pro">—</span></div>
+        <button class="btn block dim" style="margin-top:10px" onclick="document.getElementById('onboard').classList.remove('hidden');obCalc()">[ RECALIBRATE ]</button>
+      </div>
+      <div class="panel">
         <h2>DATA</h2>
         <button class="btn block dim" onclick="exportData()" style="margin-bottom:8px">[ EXPORT BACKUP (JSON) ]</button>
         <button class="btn block dim" onclick="document.getElementById('import-file').click()" style="margin-bottom:8px">[ IMPORT BACKUP ]</button>
@@ -206,11 +248,40 @@ input::placeholder { color:var(--amber-faint); }
         <div style="font-size:14px;color:var(--amber-faint);margin-top:10px">ALL DATA STORED LOCALLY ON THIS DEVICE. NO SERVER. NO ACCOUNT.</div>
       </div>
     </div>
+    <!-- TAB: REPORT -->
+    <div id="tab-report" class="hidden">
+      <div class="seg-toggle">
+        <button id="seg-new" class="sel" onclick="showReportView('new')">NEW REPORT</button>
+        <button id="seg-list" onclick="showReportView('list')">MY REPORTS (<span id="rp-count">0</span>)</button>
+      </div>
+      <div id="report-new">
+        <div class="panel">
+          <h2>WHAT'S IT ABOUT</h2>
+          <div class="seg-toggle" style="margin-bottom:12px">
+            <button id="rt-bug" class="sel" onclick="setReportType('bug')">🐛 BUG</button>
+            <button id="rt-idea" onclick="setReportType('idea')">💡 IDEA</button>
+            <button id="rt-data" onclick="setReportType('data')">🍽 FOOD DATA</button>
+          </div>
+          <textarea id="br-text" placeholder="> describe the bug or idea...&#10;> e.g. 'bar didn't reset at midnight'"></textarea>
+          <div class="br-meta" id="br-meta"></div>
+          <button class="btn block" onclick="submitReport()">[ SEND REPORT ]</button>
+          <div class="ob-note">ATTACHES DEVICE + APP DIAGNOSTICS AUTOMATICALLY. NO ACCOUNT NEEDED. REPORTS ARE STORED ON THIS DEVICE UNTIL THE SERVER SINK IS LIVE.</div>
+        </div>
+      </div>
+      <div id="report-list" class="hidden">
+        <div id="report-items"></div>
+        <div class="panel" style="text-align:center">
+          <div style="font-size:15px;color:var(--amber-faint);margin-bottom:8px">OPERATOR VIEW — STATUS FLAGS</div>
+          <button class="btn block dim" id="admin-btn" onclick="toggleAdmin()">[ UNLOCK OPERATOR MODE ]</button>
+        </div>
+      </div>
+    </div>
   </main>
   <nav>
     <button id="nav-log" class="active" onclick="showTab('log')">LOG</button>
     <button id="nav-trends" onclick="showTab('trends')">TRENDS</button>
     <button id="nav-foods" onclick="showTab('foods')">FOODS</button>
+    <button id="nav-report" onclick="showTab('report')">REPORT</button>
   </nav>
 </div>
 <div id="sheet-wrap" onclick="if(event.target===this)closeSheet()">
@@ -223,6 +294,51 @@ input::placeholder { color:var(--amber-faint); }
       <button class="btn" style="flex-shrink:0" onclick="confirmAdd()">[ LOG IT ]</button>
     </div>
   </div>
+</div>
+<div id="onboard" class="hidden">
+  <div class="ob-title glow">FUEL://NUTRITION</div>
+  <div class="ob-sub">CALIBRATE YOUR TARGETS — 30 SECONDS</div>
+  <div class="ob-step">
+    <label>SEX (AFFECTS METABOLISM MATH)</label>
+    <div class="ob-grid"><button class="ob-opt sel" data-f="sex" data-v="m" onclick="obPick(this)">MALE</button><button class="ob-opt" data-f="sex" data-v="f" onclick="obPick(this)">FEMALE</button></div>
+  </div>
+  <div class="ob-step">
+    <div class="ob-grid">
+      <div><label>AGE</label><input type="number" id="ob-age" inputmode="numeric" value="18" min="13" max="100" oninput="obCalc()"></div>
+      <div><label>HEIGHT (CM)</label><input type="number" id="ob-height" inputmode="numeric" value="170" min="120" max="230" oninput="obCalc()"><div class="ob-note" id="ob-ft">≈ 5'7"</div></div>
+    </div>
+  </div>
+  <div class="ob-step">
+    <label>WEIGHT (KG)</label>
+    <input type="number" id="ob-weight" inputmode="decimal" step="0.1" value="57.5" min="30" max="250" oninput="obCalc()">
+    <div class="ob-note" id="ob-lb">≈ 127 lb</div>
+  </div>
+  <div class="ob-step">
+    <label>ACTIVITY LEVEL</label>
+    <div class="ob-grid">
+      <button class="ob-opt" data-f="act" data-v="1.2" onclick="obPick(this)">SEDENTARY<br><span style="font-size:13px">DESK, LITTLE EXERCISE</span></button>
+      <button class="ob-opt sel" data-f="act" data-v="1.375" onclick="obPick(this)">LIGHT 1-3X/WK<br><span style="font-size:13px">YOUR LIFT SPLIT</span></button>
+      <button class="ob-opt" data-f="act" data-v="1.55" onclick="obPick(this)">MODERATE 3-5X/WK<br><span style="font-size:13px">SPORTS + GYM</span></button>
+      <button class="ob-opt" data-f="act" data-v="1.725" onclick="obPick(this)">HARD 6-7X/WK<br><span style="font-size:13px">ATHLETE / PHYSICAL JOB</span></button>
+    </div>
+  </div>
+  <div class="ob-step">
+    <label>GOAL</label>
+    <div class="ob-grid three">
+      <button class="ob-opt" data-f="goal" data-v="cut" onclick="obPick(this)">LOSE FAT<br><span style="font-size:13px">-400 CAL/DAY</span></button>
+      <button class="ob-opt" data-f="goal" data-v="maintain" onclick="obPick(this)">MAINTAIN<br><span style="font-size:13px">HOLD WEIGHT</span></button>
+      <button class="ob-opt sel" data-f="goal" data-v="bulk" onclick="obPick(this)">BUILD MUSCLE<br><span style="font-size:13px">+350 CAL/DAY</span></button>
+    </div>
+  </div>
+  <div class="ob-result show" id="ob-result">
+    <div class="ob-big" id="ob-cal">2,450 CAL/DAY</div>
+    <div class="ob-line"><span>BASE METABOLIC RATE</span><span id="ob-bmr">—</span></div>
+    <div class="ob-line"><span>MAINTENANCE (TDEE)</span><span id="ob-tdee">—</span></div>
+    <div class="ob-line"><span>PROTEIN TARGET</span><span id="ob-pro">—</span></div>
+    <div class="ob-line"><span>REST / WORKOUT CAL</span><span id="ob-split">—</span></div>
+  </div>
+  <button class="btn block" style="font-size:20px;padding:14px" onclick="finishOnboard()">[ START TRACKING ]</button>
+  <div class="ob-note" style="text-align:center">FORMULA: MIFFLIN-ST JEOR (MOST VALIDATED). EDITABLE ANYTIME IN FOODS → SETTINGS.</div>
 </div>
 <div class="toast" id="toast"></div>
 <script src="dining.js"></script>
@@ -294,28 +410,31 @@ function mergeDining(d){
   d.diningVer = DINING_VERSION;
   return d;
 }
-function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods)return mergeDining(d); }catch(e){} return mergeDining(seed()); }
-function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:90000}; save(d); return d; }
+function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods){ if(!d.reports)d.reports=[]; if(!('onboarded' in d))d.onboarded=!!d.settings; return mergeDining(d); } }catch(e){} return mergeDining(seed()); }
+function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:90000,reports:[],settings:null,onboarded:false}; save(d); return d; }
 function save(d){ try{ localStorage.setItem(KEY,JSON.stringify(d)); }catch(e){ toast('STORAGE ERROR'); } }
 let DB=load();
 // ============ HELPERS ============
-function todayStr(off=0){ const dt=new Date(); dt.setDate(dt.getDate()+off); return dt.toISOString().slice(0,10); }
+function todayStr(off=0){ const dt=new Date(); dt.setDate(dt.getDate()+off); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
 function dow(dtStr){ return new Date(dtStr+'T12:00:00').getDay(); } // 0=Sun
 const WORKOUT_DAYS={1:'MON 5:30 PM — AFTER LAST CLASS',4:'THU 5:30 PM — AFTER ECON-B 251',5:'FRI 3:10 PM'};
 function isWorkoutDay(off=0){ return WORKOUT_DAYS[new Date(todayStr(off)+'T12:00:00').getDay()]!==undefined; }
-function calGoal(off=0){ return isWorkoutDay(off)?2450:2100; }
-const PRO_GOAL=115;
+function baseCal(){ return (DB.settings&&DB.settings.calGoal)||2100; }
+function calGoal(off=0){ return isWorkoutDay(off)? baseCal()+350 : baseCal(); }
+function proGoal(){ return (DB.settings&&DB.settings.proGoal)||115; }
+const APP_VERSION='1.1.0';
 function dayTotals(dtStr){ let p=0,c=0; for(const e of DB.entries){ if(e.d===dtStr){p+=e.p;c+=e.c;} } return {p:Math.round(p),c:Math.round(c)}; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
 function fmtDay(dtStr){ return new Date(dtStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'}).toUpperCase(); }
 // ============ TABS ============
 function showTab(t){
-  ['log','trends','foods'].forEach(x=>{
+  ['log','trends','foods','report'].forEach(x=>{
     document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);
     document.getElementById('nav-'+x).classList.toggle('active',x===t);
   });
   if(t==='trends') renderTrends();
-  if(t==='foods') renderDb();
+  if(t==='foods'){ renderDb(); renderSettings(); }
+  if(t==='report') renderReports();
 }
 // ============ LOG TAB ============
 function renderLED(prefix, value, goal) {
@@ -331,9 +450,9 @@ function renderLED(prefix, value, goal) {
 function renderLog(){
   const t=dayTotals(todayStr());
   const cg=calGoal();
-  const ppct = renderLED('p', t.p, PRO_GOAL);
+  const ppct = renderLED('p', t.p, proGoal());
   const cpct = renderLED('c', t.c, cg);
-  document.getElementById('p-val').innerHTML=`${t.p}/${PRO_GOAL}g <span class="bl-pct">${ppct}%</span>`;
+  document.getElementById('p-val').innerHTML=`${t.p}/${proGoal()}g <span class="bl-pct">${ppct}%</span>`;
   document.getElementById('c-val').innerHTML=`${t.c}/${cg} <span class="bl-pct">${cpct}%</span>`;
   // workout banner
   const wb=document.getElementById('workout-banner');
@@ -429,13 +548,13 @@ function renderTrends(){
   const tb=document.getElementById('trend-bars'); tb.innerHTML='';
   let sumP=0,sumC=0,hits=0;
   for(let i=6;i>=0;i--){
-    const d=todayStr(-i), t=dayTotals(d); sumP+=t.p; sumC+=t.c; if(t.p>=PRO_GOAL)hits++;
+    const d=todayStr(-i), t=dayTotals(d); sumP+=t.p; sumC+=t.c; if(t.p>=proGoal())hits++;
     const row=document.createElement('div'); row.className='trend-day';
-    const pct=Math.min(100,t.p/PRO_GOAL*100);
-    row.innerHTML=`<span class="td-label">${i===0?'TODAY':fmtDay(d)}</span><div class="td-track"><div class="td-fill ${t.p>=PRO_GOAL?'hit':''}" style="width:${pct}%"></div></div><span class="td-val">${t.p}g</span>`;
+    const pct=Math.min(100,t.p/proGoal()*100);
+    row.innerHTML=`<span class="td-label">${i===0?'TODAY':fmtDay(d)}</span><div class="td-track"><div class="td-fill ${t.p>=proGoal()?'hit':''}" style="width:${pct}%"></div></div><span class="td-val">${t.p}g</span>`;
     tb.appendChild(row);
   }
-  document.getElementById('avg-protein').textContent=Math.round(sumP/7)+'g / 115g';
+  document.getElementById('avg-protein').textContent=Math.round(sumP/7)+'g / '+proGoal()+'g';
   document.getElementById('avg-cals').textContent=Math.round(sumC/7)+' kcal';
   const hd=document.getElementById('hit-days'); hd.textContent=hits+'/7 DAYS'; hd.classList.toggle('ok',hits>=5);
   let streak=0; for(let i=0;i<365;i++){ const d=todayStr(-i); if(DB.entries.some(e=>e.d===d)) streak++; else if(i>0) break; }
@@ -494,8 +613,114 @@ function importData(inp){
   r.readAsText(f); inp.value='';
 }
 function resetData(){ if(confirm('WIPE ALL DATA AND RESEED? THIS CANNOT BE UNDONE.')){ DB=seed(); renderLog(); renderDb(); toast('DATA RESET'); } }
+// ============ ONBOARDING ============
+const OB={sex:'m',act:1.375,goal:'bulk'};
+function obPick(btn){
+  OB[btn.dataset.f]=isNaN(+btn.dataset.v)?btn.dataset.v:+btn.dataset.v;
+  [...btn.parentElement.children].forEach(b=>b.classList.toggle('sel',b===btn));
+  obCalc();
+}
+function obCalc(){
+  const age=+document.getElementById('ob-age').value||18;
+  const h=+document.getElementById('ob-height').value||170;
+  const w=+document.getElementById('ob-weight').value||57.5;
+  document.getElementById('ob-ft').textContent='\u2248 '+Math.floor(h/2.54/12)+"'"+Math.round(h/2.54%12)+'"';
+  document.getElementById('ob-lb').textContent='\u2248 '+Math.round(w*2.205)+' lb';
+  // Mifflin-St Jeor
+  let bmr=10*w+6.25*h-5*age+(OB.sex==='m'?5:-161);
+  const tdee=Math.round(bmr*OB.act);
+  const sur={bulk:350,maintain:0,cut:-400}[OB.goal];
+  const cal=Math.round((tdee+sur)/10)*10;
+  const proG={bulk:2.0,maintain:1.8,cut:2.2}[OB.goal];
+  const pro=Math.round(w*proG);
+  document.getElementById('ob-bmr').textContent=Math.round(bmr)+' kcal';
+  document.getElementById('ob-tdee').textContent=tdee+' kcal';
+  document.getElementById('ob-cal').textContent=cal.toLocaleString()+' CAL/DAY';
+  document.getElementById('ob-pro').textContent=pro+'g ('+proG+' g/kg)';
+  document.getElementById('ob-split').textContent=cal+' / '+(cal+350)+' (WORKOUT)';
+  OB._cal=cal; OB._pro=pro; OB._w=w;
+}
+function finishOnboard(){
+  const w=OB._w||57.5;
+  DB.settings={sex:OB.sex,age:+document.getElementById('ob-age').value||18,
+    height:+document.getElementById('ob-height').value||170,weight:w,
+    act:OB.act,goal:OB.goal,calGoal:OB._cal||2450,proGoal:OB._pro||115};
+  DB.onboarded=true;
+  if(!DB.weights.some(x=>x.d===todayStr())) DB.weights.push({d:todayStr(),kg:w});
+  save(DB);
+  document.getElementById('onboard').classList.add('hidden');
+  renderLog(); toast('TARGETS LOCKED IN \u2713');
+}
+function maybeOnboard(){ if(!DB.onboarded) document.getElementById('onboard').classList.remove('hidden'); }
+function renderSettings(){
+  const st=DB.settings;
+  document.getElementById('set-goal').textContent=st?{bulk:'BUILD MUSCLE',maintain:'MAINTAIN',cut:'LOSE FAT'}[st.goal]:'\u2014';
+  document.getElementById('set-cal').textContent=st?st.calGoal+' kcal':'\u2014';
+  document.getElementById('set-pro').textContent=st?st.proGoal+'g':'\u2014';
+}
+// ============ BUG REPORTS (local queue, server sink TBD) ============
+let rpType='bug';
+function setReportType(t){ rpType=t; ['bug','idea','data'].forEach(x=>document.getElementById('rt-'+x).classList.toggle('sel',x===t)); }
+function showReportView(v){
+  document.getElementById('report-new').classList.toggle('hidden',v!=='new');
+  document.getElementById('report-list').classList.toggle('hidden',v!=='list');
+  document.getElementById('seg-new').classList.toggle('sel',v==='new');
+  document.getElementById('seg-list').classList.toggle('sel',v==='list');
+  if(v==='list') renderReports();
+}
+function diag(){
+  const ua=navigator.userAgent;
+  const dev=/iPhone/.test(ua)?'iPhone':/iPad/.test(ua)?'iPad':/Android/.test(ua)?'Android':'Desktop';
+  return {v:APP_VERSION,dev,ua:ua.slice(0,120),scr:screen.width+'x'+screen.height,
+    entries:DB.entries.length,foods:DB.foods.length,dv:DB.diningVer||0,
+    goal:DB.settings?DB.settings.goal:'none'};
+}
+function renderMeta(){ document.getElementById('br-meta').textContent='ATTACHED: v'+APP_VERSION+' \u00b7 '+diag().dev+' \u00b7 '+DB.entries.length+' entries logged'; }
+function submitReport(){
+  const txt=document.getElementById('br-text').value.trim();
+  if(!txt){ toast('TYPE SOMETHING FIRST'); return; }
+  DB.reports.push({id:Date.now(),type:rpType,text:txt,status:'NEW',d:todayStr(),t:new Date().toTimeString().slice(0,5),diag:diag()});
+  save(DB);
+  document.getElementById('br-text').value='';
+  renderReports();
+  toast('REPORT SENT \u2713 THANKS!');
+}
+function renderReports(){
+  document.getElementById('rp-count').textContent=DB.reports.length;
+  renderMeta();
+  const box=document.getElementById('report-items'); box.innerHTML='';
+  if(!DB.reports.length){ box.innerHTML='<div class="panel" style="color:var(--amber-faint);font-size:16px;text-align:center">NO REPORTS YET</div>'; return; }
+  DB.reports.slice().reverse().forEach(r=>{
+    const el=document.createElement('div'); el.className='report';
+    el.innerHTML=`<div class="rp-head"><span class="rp-type ${r.type}">${r.type.toUpperCase()}</span><span>${r.d} ${r.t}</span></div>
+      <div class="rp-body">${esc(r.text)}</div>
+      <div class="rp-status"><span>STATUS: ${r.status}</span>${adminMode?`<button class="rp-setstatus" onclick="cycleStatus(${r.id})">[${r.status==='NEW'?'MARK SEEN':r.status==='SEEN'?'MARK FIXED':'REOPEN'}]</button>`:''}</div>`;
+    box.appendChild(el);
+  });
+}
+let adminMode=false, adminTaps=0, adminTimer=null;
+function toggleAdmin(){
+  if(adminMode){ adminMode=false; document.getElementById('admin-btn').textContent='[ UNLOCK OPERATOR MODE ]'; renderReports(); return; }
+  const pin=prompt('OPERATOR PIN:');
+  if(pin==='2708'){ adminMode=true; document.getElementById('admin-btn').textContent='[ LOCK OPERATOR MODE ]'; renderReports(); toast('OPERATOR MODE ON'); }
+  else if(pin!==null) toast('WRONG PIN');
+}
+function cycleStatus(id){
+  const r=DB.reports.find(x=>x.id===id); if(!r)return;
+  r.status=r.status==='NEW'?'SEEN':r.status==='SEEN'?'FIXED':'NEW';
+  save(DB); renderReports();
+}
+// ============ DAILY ROLLOVER ============
+let lastDate=todayStr();
+function checkRollover(){
+  const d=todayStr();
+  if(d!==lastDate){ lastDate=d; renderLog(); renderResults(document.getElementById('search').value.trim().toLowerCase()); toast('NEW DAY — TOTALS RESET'); }
+}
+document.addEventListener('visibilitychange',()=>{ if(!document.visibilityState||document.visibilityState==='visible') checkRollover(); });
+if(typeof window!=='undefined'&&window.addEventListener) window.addEventListener('focus',checkRollover);
+setInterval(checkRollover,30000);
 // ============ INIT ============
-renderLog(); renderRestChips(); renderResults('');
+renderLog(); renderRestChips(); renderResults(''); renderMeta(); maybeOnboard();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
