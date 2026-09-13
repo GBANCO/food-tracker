@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUEL — Direction A v2</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#1a1a1f; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:#e8e8e8; padding:44px 24px 60px; display:flex; justify-content:center; }
+  .stage { display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .label { font-size:13px; letter-spacing:2px; text-transform:uppercase; color:#9a9aa5; }
+  .frame { width:330px; height:680px; border-radius:42px; overflow:hidden;
+    box-shadow:0 24px 60px rgba(0,0,0,.55); }
+  .screen { width:100%; height:100%; background:#f7f3ea; color:#0f0f0f;
+    font-family:'Arial Black',Arial,Helvetica,sans-serif; display:flex; flex-direction:column; overflow:hidden; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="label">A v2 · Neobrutalism + LED bars</div>
+  <div class="frame">
+    <div class="screen">
+
+      <!-- header -->
+      <div style="padding:20px 18px 12px;border-bottom:3px solid #0f0f0f;display:flex;align-items:center;justify-content:space-between;">
+        <div style="background:#0f0f0f;color:#f7f3ea;padding:6px 13px;font-size:15px;letter-spacing:1px;">⚡FUEL</div>
+        <!-- streak hero -->
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:26px;line-height:1;">🔥</div>
+          <div>
+            <div style="font-size:24px;font-weight:bold;line-height:1;text-shadow:0 2px 0 #ff6b6b;">6</div>
+            <div style="font-size:9px;letter-spacing:1px;color:#555;font-weight:bold;">DAY STREAK</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- workout banner -->
+      <div style="margin:16px 18px 0;background:#4ecdc4;border:3px solid #0f0f0f;box-shadow:4px 4px 0 #0f0f0f;padding:11px;font-size:13px;font-weight:bold;">
+        💪 WORKOUT TODAY — GO +350 CAL
+      </div>
+
+      <!-- totals -->
+      <div style="margin:16px 18px 0;background:#fff;border:3px solid #0f0f0f;box-shadow:5px 5px 0 #0f0f0f;padding:16px;">
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+            <span style="font-size:11px;color:#555;font-weight:bold;letter-spacing:1px;">PROTEIN</span>
+            <span style="font-size:13px;font-weight:bold;">78/115g</span>
+          </div>
+          <div style="height:20px;background:#f7f3ea;border:3px solid #0f0f0f;overflow:hidden;position:relative;">
+            <div style="width:68%;height:100%;background:linear-gradient(90deg,#ff2a2a,#ff7a1a,#ffd400,#9be600,#33ff66);box-shadow:0 0 12px rgba(255,150,0,.7);"></div>
+            <div style="position:absolute;left:68%;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 10px 2px #ffd400;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+            <span style="font-size:11px;color:#555;font-weight:bold;letter-spacing:1px;">CALORIES</span>
+            <span style="font-size:13px;font-weight:bold;">1,420 / 2,450</span>
+          </div>
+          <div style="height:20px;background:#f7f3ea;border:3px solid #0f0f0f;overflow:hidden;position:relative;">
+            <div style="width:58%;height:100%;background:linear-gradient(90deg,#ff2a2a,#ff7a1a,#ffd400,#9be600,#33ff66);box-shadow:0 0 12px rgba(255,150,0,.7);"></div>
+            <div style="position:absolute;left:58%;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 10px 2px #ffd400;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- search -->
+      <div style="margin:16px 18px 0;background:#fff;border:3px solid #0f0f0f;box-shadow:4px 4px 0 #0f0f0f;padding:13px;font-size:14px;color:#999;font-family:Arial,Helvetica,sans-serif;font-weight:bold;">
+        🔍 Search 391 foods…
+      </div>
+
+      <!-- quick add -->
+      <div style="margin:16px 18px 0;display:flex;gap:8px;">
+        <span style="background:#ffd02f;border:3px solid #0f0f0f;box-shadow:3px 3px 0 #0f0f0f;padding:8px 12px;font-size:12px;font-weight:bold;">🥤 Whey +</span>
+        <span style="background:#4ecdc4;border:3px solid #0f0f0f;box-shadow:3px 3px 0 #0f0f0f;padding:8px 12px;font-size:12px;font-weight:bold;">🍗 Chicken +</span>
+        <span style="background:#ff6b6b;border:3px solid #0f0f0f;box-shadow:3px 3px 0 #0f0f0f;padding:8px 12px;font-size:12px;font-weight:bold;">🍚 Rice +</span>
+      </div>
+
+      <!-- today's log -->
+      <div style="margin:16px 18px 0;font-size:12px;font-weight:bold;color:#555;letter-spacing:1px;">TODAY'S LOG</div>
+      <div style="margin:8px 18px;border:3px solid #0f0f0f;background:#fff;box-shadow:4px 4px 0 #0f0f0f;overflow:hidden;">
+        <div style="padding:11px 12px;border-bottom:2px solid #0f0f0f;display:flex;justify-content:space-between;font-size:13px;">
+          <span>08:15 · Eggs ×3</span><span>234 cal · 18g P</span></div>
+        <div style="padding:11px 12px;border-bottom:2px solid #0f0f0f;display:flex;justify-content:space-between;font-size:13px;">
+          <span>12:40 · Chicken Bowl</span><span>610 cal · 42g P</span></div>
+        <div style="padding:11px 12px;display:flex;justify-content:space-between;font-size:13px;">
+          <span>16:05 · Whey Shake</span><span>120 cal · 24g P</span></div>
+      </div>
+
+      <!-- nav -->
+      <div style="margin-top:auto;border-top:3px solid #0f0f0f;display:flex;">
+        <div style="flex:1;text-align:center;padding:13px 0;font-size:11px;font-weight:bold;background:#0f0f0f;color:#fff;">LOG</div>
+        <div style="flex:1;text-align:center;padding:13px 0;font-size:11px;font-weight:bold;">TRENDS</div>
+        <div style="flex:1;text-align:center;padding:13px 0;font-size:11px;font-weight:bold;">FOODS</div>
+        <div style="flex:1;text-align:center;padding:13px 0;font-size:11px;font-weight:bold;">REPORT</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
