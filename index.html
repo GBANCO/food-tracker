@@ -247,16 +247,6 @@ textarea::placeholder { color:var(--faint); }
     <!-- TAB: FOODS -->
     <div id="tab-foods" class="hidden">
       <div class="panel">
-        <h2>ADD CUSTOM FOOD</h2>
-        <input type="text" id="nf-name" placeholder="FOOD NAME" style="margin-bottom:8px" autocomplete="off">
-        <div class="qty-row" style="margin-bottom:8px">
-          <input type="number" id="nf-cal" inputmode="numeric" placeholder="CALORIES">
-          <input type="number" id="nf-pro" inputmode="decimal" step="0.1" placeholder="PROTEIN g">
-        </div>
-        <input type="text" id="nf-unit" placeholder="PER UNIT (e.g. '1 scoop', '100g')" value="1 serving" style="margin-bottom:10px" autocomplete="off">
-        <button class="btn block" onclick="addCustomFood()">[ ADD TO DATABASE ]</button>
-      </div>
-      <div class="panel">
         <h2>FOOD DATABASE (<span id="food-count"></span>)</h2>
         <input type="search" id="db-search" placeholder="> filter..." style="margin-bottom:8px" autocomplete="off">
         <div id="db-list" style="max-height:40vh;overflow-y:auto"></div>
@@ -280,7 +270,11 @@ textarea::placeholder { color:var(--faint); }
     <!-- TAB: COMMUNITY -->
     <div id="tab-community" class="hidden">
       <div class="panel">
-        <h2>ADD A COMMUNITY FOOD</h2>
+        <h2>ADD FOOD</h2>
+        <div class="seg-toggle" style="margin-bottom:12px">
+          <button id="addt-personal" class="sel" onclick="setAddTarget('personal')">🔒 PERSONAL</button>
+          <button id="addt-community" onclick="setAddTarget('community')">🌍 COMMUNITY</button>
+        </div>
         <input type="text" id="cf-name" placeholder="FOOD NAME (e.g. Quest Protein Bar)" style="margin-bottom:8px" autocomplete="off">
         <input type="text" id="cf-brand" placeholder="BRAND / NOTE (optional)" style="margin-bottom:8px" autocomplete="off">
         <div class="qty-row" style="margin-bottom:8px">
@@ -288,8 +282,8 @@ textarea::placeholder { color:var(--faint); }
           <input type="number" id="cf-pro" inputmode="decimal" step="0.1" placeholder="PROTEIN g">
         </div>
         <input type="text" id="cf-unit" placeholder="PER (e.g. '1 bar', '1 scoop')" value="1 serving" style="margin-bottom:10px" autocomplete="off">
-        <button class="btn block" onclick="addCommunityFood()">[ ADD TO COMMUNITY ]</button>
-        <div class="ob-note">SHARED WITH EVERY FUEL USER. GOES LIVE INSTANTLY — FLAG JUNK WITH 🚩.</div>
+        <button class="btn block" id="add-food-btn" onclick="submitAddFood()">[ ADD TO MY FOODS ]</button>
+        <div class="ob-note" id="add-food-note">PRIVATE — SAVES TO THIS DEVICE ONLY.</div>
       </div>
       <div class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -678,16 +672,15 @@ function logWeight(){
   save(DB); document.getElementById('weight-in').value=''; renderTrends(); toast('WEIGHT LOGGED: '+v+' KG');
 }
 // ============ FOODS TAB ============
-function addCustomFood(){
-  const n=document.getElementById('nf-name').value.trim();
-  const c=parseFloat(document.getElementById('nf-cal').value);
-  const p=parseFloat(document.getElementById('nf-pro').value);
-  const u=document.getElementById('nf-unit').value.trim()||'1 serving';
-  if(!n||isNaN(c)||isNaN(p)){ toast('NEED NAME + CALORIES + PROTEIN'); return; }
-  DB.foods.push({id:DB.nextId++,n,c,p,u}); save(DB);
-  ['nf-name','nf-cal','nf-pro'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('nf-unit').value='1 serving';
-  renderDb(); toast('ADDED: '+n.toUpperCase());
+let addTarget='personal';
+function setAddTarget(t){
+  addTarget=t;
+  document.getElementById('addt-personal').classList.toggle('sel',t==='personal');
+  document.getElementById('addt-community').classList.toggle('sel',t==='community');
+  document.getElementById('add-food-btn').textContent = t==='personal' ? '[ ADD TO MY FOODS ]' : '[ ADD TO COMMUNITY ]';
+  document.getElementById('add-food-note').textContent = t==='personal'
+    ? 'PRIVATE — SAVES TO THIS DEVICE ONLY.'
+    : 'SHARED WITH EVERY FUEL USER. GOES LIVE INSTANTLY — FLAG JUNK WITH 🚩.';
 }
 function renderDb(){
   document.getElementById('food-count').textContent=DB.foods.length;
@@ -850,21 +843,24 @@ function renderCommunity(){
     box.appendChild(el);
   });
 }
-async function addCommunityFood(){
+async function submitAddFood(){
   const n=document.getElementById('cf-name').value.trim();
   const brand=document.getElementById('cf-brand').value.trim();
   const c=parseFloat(document.getElementById('cf-cal').value);
   const pr=parseFloat(document.getElementById('cf-pro').value);
   const u=document.getElementById('cf-unit').value.trim()||'1 serving';
   if(!n||isNaN(c)||isNaN(pr)){ toast('NEED NAME + CALORIES + PROTEIN'); return; }
+  const clear=()=>{ ['cf-name','cf-brand','cf-cal','cf-pro'].forEach(id=>document.getElementById(id).value=''); document.getElementById('cf-unit').value='1 serving'; };
+  if(addTarget==='personal'){
+    DB.foods.push({id:DB.nextId++,n:(brand?n+' ('+brand+')':n),c,p:pr,u}); save(DB);
+    clear(); renderDb(); toast('ADDED: '+n.toUpperCase());
+    return;
+  }
   if(!SB){ toast('CLOUD NOT CONNECTED'); return; }
   try{
     const {error}=await SB.from('community_foods').insert({name:n,brand:brand||null,cal:c,pro:pr,unit:u});
     if(error){ toast('FAILED TO ADD'); return; }
-    ['cf-name','cf-brand','cf-cal','cf-pro'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('cf-unit').value='1 serving';
-    toast('ADDED TO COMMUNITY \u2713');
-    fetchCommunity();
+    clear(); toast('ADDED TO COMMUNITY \u2713'); fetchCommunity();
   }catch(e){ toast('FAILED TO ADD'); }
 }
 async function flagCommunity(cid){
