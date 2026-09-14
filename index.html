@@ -153,7 +153,9 @@ textarea::placeholder { color:var(--faint); }
 .rp-setstatus { background:none; border:2px solid var(--ink); color:var(--ink); font-family:inherit; font-size:12px; padding:4px 8px; cursor:pointer; font-weight:800; }
 /* header bug button + report sheet */
 .hdr-left { display:flex; align-items:center; gap:10px; }
-.bug-btn { background:var(--card); border:3px solid var(--ink); color:var(--ink); width:44px; height:44px; font-size:20px; cursor:pointer; box-shadow:3px 3px 0 var(--ink); font-family:inherit; line-height:1; }
+.bug-btn { background:var(--card); border:3px solid var(--ink); color:var(--ink); min-height:44px; padding:0 10px; font-size:16px; cursor:pointer; box-shadow:3px 3px 0 var(--ink); font-family:inherit; line-height:1; display:flex; align-items:center; gap:6px; }
+.bug-ico { font-size:20px; line-height:1; }
+.bug-lbl { font-size:10px; font-weight:900; letter-spacing:1px; font-family:'Arial Black',Arial,sans-serif; }
 .bug-btn:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink); }
 #report-wrap { position:fixed; inset:0; background:rgba(15,15,15,.55); z-index:210; display:none; }
 #report-wrap.open { display:flex; align-items:flex-end; }
@@ -176,7 +178,7 @@ textarea::placeholder { color:var(--faint); }
   <header>
     <div class="hdr-left">
       <div class="logo">⚡FUEL</div>
-      <button class="bug-btn" onclick="openReportSheet()" title="Report a bug">🐛</button>
+      <button class="bug-btn" onclick="openReportSheet()" title="Report a bug"><span class="bug-ico">⚠️</span><span class="bug-lbl">REPORT</span></button>
     </div>
     <div class="streak-hero">
       <div class="flame">🔥</div>
