@@ -62,6 +62,7 @@ input::placeholder { color:var(--faint); }
 .result .rmeta { font-size:13px; color:var(--muted); font-weight:600; }
 .result .radd { color:var(--ink); font-size:22px; padding:0 8px; font-weight:900; }
 .result .rrest { color:#0a8f5c; font-size:13px; }
+.ralso { font-size:11px; color:var(--muted); font-weight:700; margin-top:2px; }
 /* today log */
 .entry { display:flex; justify-content:space-between; align-items:center; padding:10px 4px; border-bottom:2px solid #e9e3d2; }
 .entry:last-child { border-bottom:none; }
@@ -206,6 +207,7 @@ textarea::placeholder { color:var(--faint); }
       <div id="combo-chips"></div>
       <button class="btn block dim" onclick="saveTodayAsCombo()" style="margin-bottom:4px">＋ SAVE TODAY AS COMBO</button>
       <div class="section-title">SEARCH FOOD DB</div>
+      <div class="rest-chips" id="hall-chips"></div>
       <div class="rest-chips" id="rest-chips"></div>
       <input type="search" id="search" placeholder="> type food name..." autocomplete="off" autocapitalize="off" spellcheck="false">
       <div id="search-results" class="panel" style="margin-top:8px"></div>
@@ -305,6 +307,7 @@ textarea::placeholder { color:var(--faint); }
   <div id="sheet">
     <div class="sname glow" id="sheet-name"></div>
     <div class="smeta" id="sheet-meta"></div>
+    <div class="ralso" id="sheet-also" style="display:none;margin-bottom:8px"></div>
     <div class="qty-presets" id="sheet-presets"></div>
     <div class="qty-row">
       <input type="number" id="sheet-qty" inputmode="decimal" step="0.5" value="1">
@@ -573,37 +576,59 @@ function logCombo(id){
 function delCombo(id){ DB.combos=(DB.combos||[]).filter(c=>c.id!==id); save(DB); renderCombos(); toast('COMBO DELETED'); }
 // ============ SEARCH ============
 const searchEl=document.getElementById('search');
-let restFilter=null;
+let hallFilter=null, restFilter=null;
+function hallRank(h){ const i=(typeof DINING_HALLS!=='undefined'?DINING_HALLS:[]).indexOf(h); return i<0?999:i; }
+function renderHallChips(){
+  const box=document.getElementById('hall-chips'); box.innerHTML='';
+  const halls = (typeof DINING_HALLS!=='undefined') ? DINING_HALLS : [];
+  const mk=(label,val)=>{ const b=document.createElement('button'); b.textContent=label;
+    if(hallFilter===val) b.classList.add('sel');
+    b.onclick=()=>{ hallFilter=val; restFilter=null; renderHallChips(); renderRestChips(); renderResults(searchEl.value.trim().toLowerCase()); };
+    box.appendChild(b); };
+  mk('ALL HALLS',null); halls.forEach(h=>mk(h.toUpperCase(),h));
+}
 function renderRestChips(){
   const box=document.getElementById('rest-chips'); box.innerHTML='';
-  const rests = (typeof DINING_RESTAURANTS!=='undefined') ? DINING_RESTAURANTS : [];
+  const hr = (typeof DINING_HALL_RESTAURANTS!=='undefined') ? DINING_HALL_RESTAURANTS : {};
+  let rests = hallFilter ? (hr[hallFilter]||[]) : [];
   const mk=(label,val)=>{ const b=document.createElement('button'); b.textContent=label;
     if(restFilter===val) b.classList.add('sel');
     b.onclick=()=>{ restFilter=val; renderRestChips(); renderResults(searchEl.value.trim().toLowerCase()); };
     box.appendChild(b); };
-  mk('ALL',null); rests.forEach(r=>mk(r.toUpperCase(),r));
+  if(rests.length){ mk('ALL',null); rests.forEach(r=>mk(r.toUpperCase(),r)); }
 }
 searchEl.addEventListener('input',()=>{ renderResults(searchEl.value.trim().toLowerCase()); });
 function renderResults(q){
   const box=document.getElementById('search-results');
-  let pool = restFilter ? DB.foods.filter(f=>f.r===restFilter) : DB.foods;
+  let pool = DB.foods;
+  if(hallFilter) pool = pool.filter(f=>f.h===hallFilter);
+  if(restFilter) pool = pool.filter(f=>f.r===restFilter);
   let list=q? pool.filter(f=>f.n.toLowerCase().includes(q)) : pool.slice(0,8);
+  // sort: hall order -> restaurant -> name
+  list = list.slice().sort((a,b)=>{
+    const ha=hallRank(a.h), hb=hallRank(b.h); if(ha!==hb) return ha-hb;
+    const ra=(a.r||'').localeCompare(b.r||''); if(ra!==0) return ra;
+    return a.n.localeCompare(b.n);
+  });
   box.innerHTML='';
   list.slice(0,20).forEach(f=>{
     const r=document.createElement('div'); r.className='result';
-    const rest=f.r?` <span class="rrest">· ${esc(f.r)}</span>`:'';
-    r.innerHTML=`<div><div class="rname">${esc(f.n)}${rest}</div><div class="rmeta">${f.c} cal · ${f.p}g protein · per ${esc(f.u)}</div></div><span class="radd">[+]</span>`;
+    const loc=(f.h||f.r)?` <span class="rrest">· ${esc(f.h?f.h+(f.r?' · '+f.r:''):f.r)}</span>`:'';
+    const also=(f.also&&f.also.length)?`<div class="ralso">↳ ALSO AT: ${esc(f.also.join(', '))}</div>`:'';
+    r.innerHTML=`<div><div class="rname">${esc(f.n)}${loc}</div><div class="rmeta">${f.c} cal · ${f.p}g protein · per ${esc(f.u)}</div>${also}</div><span class="radd">[+]</span>`;
     r.onclick=()=>openSheet(f.id);
     box.appendChild(r);
   });
-  if(!list.length) box.innerHTML='<div style="padding:10px;color:var(--amber-faint)">NO MATCH — ADD IT IN FOODS TAB</div>';
+  if(!list.length) box.innerHTML='<div style="padding:10px;color:var(--amber-faint)">NO MATCH — ADD IT IN COMMUNITY TAB</div>';
 }
 // ============ QTY SHEET ============
 let sheetFoodId=null;
 function openSheet(fid){
   sheetFoodId=fid; const f=DB.foods.find(x=>x.id===fid); if(!f)return;
   document.getElementById('sheet-name').textContent=f.n.toUpperCase();
-  document.getElementById('sheet-meta').textContent=`${f.c} cal · ${f.p}g protein · per ${f.u}${f.r?' · '+f.r:''}`;
+  const loc=(f.h||f.r)?(f.h+(f.r?' · '+f.r:'')):'';
+  document.getElementById('sheet-meta').textContent=`${f.c} cal · ${f.p}g protein · per ${f.u}${loc?' · '+loc:''}`;
+  const sa=document.getElementById('sheet-also'); if(sa){ if(f.also&&f.also.length){ sa.textContent='↳ ALSO AT: '+f.also.join(', '); sa.style.display='block'; } else sa.style.display='none'; }
   const presets=document.getElementById('sheet-presets'); presets.innerHTML='';
   [0.5,1,1.5,2,3].forEach(q=>{ const b=document.createElement('button'); b.textContent='×'+q;
     b.onclick=()=>{ document.getElementById('sheet-qty').value=q;
@@ -878,7 +903,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.visibilityState|
 if(typeof window!=='undefined'&&window.addEventListener) window.addEventListener('focus',checkRollover);
 setInterval(checkRollover,30000);
 // ============ INIT ============
-renderLog(); renderRestChips(); renderResults(''); renderMeta(); renderCombos(); renderCommunity(); initCloud(); fetchCommunity(); maybeOnboard();
+renderLog(); renderHallChips(); renderRestChips(); renderResults(''); renderMeta(); renderCombos(); renderCommunity(); initCloud(); fetchCommunity(); maybeOnboard();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
