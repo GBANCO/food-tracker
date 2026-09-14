@@ -151,12 +151,33 @@ textarea::placeholder { color:var(--faint); }
 .report .rp-body { font-size:14px; white-space:pre-wrap; font-weight:600; }
 .report .rp-status { font-size:12px; color:var(--muted); margin-top:6px; display:flex; justify-content:space-between; align-items:center; font-weight:600; }
 .rp-setstatus { background:none; border:2px solid var(--ink); color:var(--ink); font-family:inherit; font-size:12px; padding:4px 8px; cursor:pointer; font-weight:800; }
+/* header bug button + report sheet */
+.hdr-left { display:flex; align-items:center; gap:10px; }
+.bug-btn { background:var(--card); border:3px solid var(--ink); color:var(--ink); width:44px; height:44px; font-size:20px; cursor:pointer; box-shadow:3px 3px 0 var(--ink); font-family:inherit; line-height:1; }
+.bug-btn:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink); }
+#report-wrap { position:fixed; inset:0; background:rgba(15,15,15,.55); z-index:210; display:none; }
+#report-wrap.open { display:flex; align-items:flex-end; }
+#report-sheet { width:100%; max-height:90dvh; overflow-y:auto; background:var(--paper); border-top:3px solid var(--ink); padding:16px 16px calc(20px + env(safe-area-inset-bottom)); }
+.rs-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.rs-title { font-size:20px; font-weight:900; font-family:'Arial Black',Arial,sans-serif; }
+.rs-close { background:none; border:3px solid var(--ink); color:var(--ink); width:40px; height:40px; font-size:18px; cursor:pointer; font-family:inherit; }
+/* community */
+.community-item { display:flex; justify-content:space-between; align-items:center; border:3px solid var(--ink); background:var(--card); padding:12px; margin-bottom:10px; box-shadow:3px 3px 0 var(--ink); }
+.ci-name { font-size:15px; font-weight:800; }
+.ci-meta { font-size:12px; color:var(--muted); font-weight:600; margin-top:2px; }
+.ci-actions { display:flex; gap:6px; flex-shrink:0; margin-left:10px; }
+.ci-btn { background:var(--card); border:3px solid var(--ink); color:var(--ink); font-family:'Arial Black',Arial,sans-serif; font-size:12px; font-weight:900; padding:7px 9px; cursor:pointer; box-shadow:2px 2px 0 var(--ink); }
+.ci-btn.flag { color:var(--warn); }
+.ci-btn:active { transform:translate(2px,2px); box-shadow:none; }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div class="logo">⚡FUEL</div>
+    <div class="hdr-left">
+      <div class="logo">⚡FUEL</div>
+      <button class="bug-btn" onclick="openReportSheet()" title="Report a bug">🐛</button>
+    </div>
     <div class="streak-hero">
       <div class="flame">🔥</div>
       <div><div class="num" id="hdr-streak-num">0</div><div class="lbl">DAY STREAK</div></div>
@@ -254,32 +275,26 @@ textarea::placeholder { color:var(--faint); }
         <div style="font-size:14px;color:var(--amber-faint);margin-top:10px">ALL DATA STORED LOCALLY ON THIS DEVICE. NO SERVER. NO ACCOUNT.</div>
       </div>
     </div>
-    <!-- TAB: REPORT -->
-    <div id="tab-report" class="hidden">
-      <div class="seg-toggle">
-        <button id="seg-new" class="sel" onclick="showReportView('new')">NEW REPORT</button>
-        <button id="seg-list" onclick="showReportView('list')">MY REPORTS (<span id="rp-count">0</span>)</button>
-      </div>
-      <div id="report-new">
-        <div class="panel">
-          <h2>WHAT'S IT ABOUT</h2>
-          <div class="seg-toggle" style="margin-bottom:12px">
-            <button id="rt-bug" class="sel" onclick="setReportType('bug')">🐛 BUG</button>
-            <button id="rt-idea" onclick="setReportType('idea')">💡 IDEA</button>
-            <button id="rt-data" onclick="setReportType('data')">🍽 FOOD DATA</button>
-          </div>
-          <textarea id="br-text" placeholder="> describe the bug or idea...&#10;> e.g. 'bar didn't reset at midnight'"></textarea>
-          <div class="br-meta" id="br-meta"></div>
-          <button class="btn block" onclick="submitReport()">[ SEND REPORT ]</button>
-          <div class="ob-note">ATTACHES DEVICE + APP DIAGNOSTICS AUTOMATICALLY. NO ACCOUNT NEEDED. REPORTS ARE STORED ON THIS DEVICE UNTIL THE SERVER SINK IS LIVE.</div>
+    <!-- TAB: COMMUNITY -->
+    <div id="tab-community" class="hidden">
+      <div class="panel">
+        <h2>ADD A COMMUNITY FOOD</h2>
+        <input type="text" id="cf-name" placeholder="FOOD NAME (e.g. Quest Protein Bar)" style="margin-bottom:8px" autocomplete="off">
+        <input type="text" id="cf-brand" placeholder="BRAND / NOTE (optional)" style="margin-bottom:8px" autocomplete="off">
+        <div class="qty-row" style="margin-bottom:8px">
+          <input type="number" id="cf-cal" inputmode="numeric" placeholder="CALORIES">
+          <input type="number" id="cf-pro" inputmode="decimal" step="0.1" placeholder="PROTEIN g">
         </div>
+        <input type="text" id="cf-unit" placeholder="PER (e.g. '1 bar', '1 scoop')" value="1 serving" style="margin-bottom:10px" autocomplete="off">
+        <button class="btn block" onclick="addCommunityFood()">[ ADD TO COMMUNITY ]</button>
+        <div class="ob-note">SHARED WITH EVERY FUEL USER. GOES LIVE INSTANTLY — FLAG JUNK WITH 🚩.</div>
       </div>
-      <div id="report-list" class="hidden">
-        <div id="report-items"></div>
-        <div class="panel" style="text-align:center">
-          <div style="font-size:15px;color:var(--amber-faint);margin-bottom:8px">OPERATOR VIEW — STATUS FLAGS</div>
-          <button class="btn block dim" id="admin-btn" onclick="toggleAdmin()">[ UNLOCK OPERATOR MODE ]</button>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <h2 style="margin:0">COMMUNITY FOODS</h2>
+          <button class="ci-btn" onclick="fetchCommunity()">↻ REFRESH</button>
         </div>
+        <div id="community-list"></div>
       </div>
     </div>
   </main>
@@ -287,7 +302,7 @@ textarea::placeholder { color:var(--faint); }
     <button id="nav-log" class="active" onclick="showTab('log')">LOG</button>
     <button id="nav-trends" onclick="showTab('trends')">TRENDS</button>
     <button id="nav-foods" onclick="showTab('foods')">FOODS</button>
-    <button id="nav-report" onclick="showTab('report')">REPORT</button>
+    <button id="nav-community" onclick="showTab('community')">COMMUNITY</button>
   </nav>
 </div>
 <div id="sheet-wrap" onclick="if(event.target===this)closeSheet()">
@@ -298,6 +313,37 @@ textarea::placeholder { color:var(--faint); }
     <div class="qty-row">
       <input type="number" id="sheet-qty" inputmode="decimal" step="0.5" value="1">
       <button class="btn" style="flex-shrink:0" onclick="confirmAdd()">[ LOG IT ]</button>
+    </div>
+  </div>
+</div>
+<div id="report-wrap" onclick="if(event.target===this)closeReportSheet()">
+  <div id="report-sheet">
+    <div class="rs-head">
+      <div class="rs-title">🐛 REPORT</div>
+      <button class="rs-close" onclick="closeReportSheet()">✕</button>
+    </div>
+    <div class="seg-toggle">
+      <button id="seg-new" class="sel" onclick="showReportView('new')">NEW REPORT</button>
+      <button id="seg-list" onclick="showReportView('list')">MY REPORTS (<span id="rp-count">0</span>)</button>
+    </div>
+    <div id="report-new">
+      <div class="panel">
+        <div class="seg-toggle" style="margin-bottom:12px">
+          <button id="rt-bug" class="sel" onclick="setReportType('bug')">🐛 BUG</button>
+          <button id="rt-idea" onclick="setReportType('idea')">💡 IDEA</button>
+          <button id="rt-data" onclick="setReportType('data')">🍽 FOOD DATA</button>
+        </div>
+        <textarea id="br-text" placeholder="> describe the bug or idea...&#10;> e.g. 'bar didn't reset at midnight'"></textarea>
+        <div class="br-meta" id="br-meta"></div>
+        <button class="btn block" onclick="submitReport()">[ SEND REPORT ]</button>
+      </div>
+    </div>
+    <div id="report-list" class="hidden">
+      <div id="report-items"></div>
+      <div class="panel" style="text-align:center">
+        <div style="font-size:13px;color:var(--amber-faint);margin-bottom:8px">OPERATOR VIEW — STATUS FLAGS</div>
+        <button class="btn block dim" id="admin-btn" onclick="toggleAdmin()">[ UNLOCK OPERATOR MODE ]</button>
+      </div>
     </div>
   </div>
 </div>
@@ -347,6 +393,7 @@ textarea::placeholder { color:var(--faint); }
   <div class="ob-note" style="text-align:center">FORMULA: MIFFLIN-ST JEOR (MOST VALIDATED). EDITABLE ANYTIME IN FOODS → SETTINGS.</div>
 </div>
 <div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="dining.js"></script>
 <script>
 'use strict';
@@ -416,8 +463,8 @@ function mergeDining(d){
   d.diningVer = DINING_VERSION;
   return d;
 }
-function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods){ if(!d.reports)d.reports=[]; if(!d.combos)d.combos=[]; if(!('onboarded' in d))d.onboarded=!!d.settings; return mergeDining(d); } }catch(e){} return mergeDining(seed()); }
-function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:90000,reports:[],combos:[],settings:null,onboarded:false}; save(d); return d; }
+function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods){ if(!d.reports)d.reports=[]; if(!d.combos)d.combos=[]; if(!d.community)d.community=[]; if(!('onboarded' in d))d.onboarded=!!d.settings; return mergeDining(d); } }catch(e){} return mergeDining(seed()); }
+function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:90000,reports:[],combos:[],community:[],settings:null,onboarded:false}; save(d); return d; }
 function save(d){ try{ localStorage.setItem(KEY,JSON.stringify(d)); }catch(e){ toast('STORAGE ERROR'); } }
 let DB=load();
 // ============ HELPERS ============
@@ -428,19 +475,28 @@ function isWorkoutDay(off=0){ return WORKOUT_DAYS[new Date(todayStr(off)+'T12:00
 function baseCal(){ return (DB.settings&&DB.settings.calGoal)||2100; }
 function calGoal(off=0){ return isWorkoutDay(off)? baseCal()+350 : baseCal(); }
 function proGoal(){ return (DB.settings&&DB.settings.proGoal)||115; }
-const APP_VERSION='1.1.0';
+const APP_VERSION='1.3.0';
+// ============ CLOUD (Supabase) ============
+const SUPABASE_URL='https://YOUR-PROJECT.supabase.co'; // <-- paste project URL
+const SUPABASE_ANON_KEY='YOUR-ANON-KEY';               // <-- paste anon key
+let SB=null;
+function initCloud(){
+  if(typeof supabase==='undefined') return;
+  if(SUPABASE_URL.indexOf('YOUR-PROJECT')>=0) return;
+  try{ SB=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){ SB=null; }
+}
 function dayTotals(dtStr){ let p=0,c=0; for(const e of DB.entries){ if(e.d===dtStr){p+=e.p;c+=e.c;} } return {p:Math.round(p),c:Math.round(c)}; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
 function fmtDay(dtStr){ return new Date(dtStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'}).toUpperCase(); }
 // ============ TABS ============
 function showTab(t){
-  ['log','trends','foods','report'].forEach(x=>{
+  ['log','trends','foods','community'].forEach(x=>{
     document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);
     document.getElementById('nav-'+x).classList.toggle('active',x===t);
   });
   if(t==='trends') renderTrends();
   if(t==='foods'){ renderDb(); renderSettings(); }
-  if(t==='report') renderReports();
+  if(t==='community'){ renderCommunity(); fetchCommunity(); }
 }
 // ============ LOG TAB ============
 function renderLED(prefix, value, goal) {
@@ -705,8 +761,10 @@ function renderSettings(){
   document.getElementById('set-cal').textContent=st?st.calGoal+' kcal':'\u2014';
   document.getElementById('set-pro').textContent=st?st.proGoal+'g':'\u2014';
 }
-// ============ BUG REPORTS (local queue, server sink TBD) ============
+// ============ BUG REPORTS (cloud sink) ============
 let rpType='bug';
+function openReportSheet(){ document.getElementById('report-wrap').classList.add('open'); showReportView('new'); renderReports(); }
+function closeReportSheet(){ document.getElementById('report-wrap').classList.remove('open'); }
 function setReportType(t){ rpType=t; ['bug','idea','data'].forEach(x=>document.getElementById('rt-'+x).classList.toggle('sel',x===t)); }
 function showReportView(v){
   document.getElementById('report-new').classList.toggle('hidden',v!=='new');
@@ -723,14 +781,19 @@ function diag(){
     goal:DB.settings?DB.settings.goal:'none'};
 }
 function renderMeta(){ document.getElementById('br-meta').textContent='ATTACHED: v'+APP_VERSION+' \u00b7 '+diag().dev+' \u00b7 '+DB.entries.length+' entries logged'; }
-function submitReport(){
+async function submitReport(){
   const txt=document.getElementById('br-text').value.trim();
   if(!txt){ toast('TYPE SOMETHING FIRST'); return; }
-  DB.reports.push({id:Date.now(),type:rpType,text:txt,status:'NEW',d:todayStr(),t:new Date().toTimeString().slice(0,5),diag:diag()});
-  save(DB);
+  const rec={id:Date.now(),type:rpType,text:txt,status:'NEW',d:todayStr(),t:new Date().toTimeString().slice(0,5),diag:diag()};
+  DB.reports.push(rec); save(DB);
   document.getElementById('br-text').value='';
   renderReports();
-  toast('REPORT SENT \u2713 THANKS!');
+  if(SB){
+    try{
+      const {error}=await SB.from('bug_reports').insert({type:rpType,text:txt,diag:diag()});
+      toast(error?'QUEUED (SYNC LATER)':'REPORT SENT \u2713');
+    }catch(e){ toast('QUEUED (SYNC LATER)'); }
+  } else toast('QUEUED — CLOUD NOT CONNECTED');
 }
 function renderReports(){
   document.getElementById('rp-count').textContent=DB.reports.length;
@@ -757,6 +820,56 @@ function cycleStatus(id){
   r.status=r.status==='NEW'?'SEEN':r.status==='SEEN'?'FIXED':'NEW';
   save(DB); renderReports();
 }
+// ============ COMMUNITY ============
+function mergeCommunity(){
+  DB.foods=DB.foods.filter(f=>f.src!=='community');
+  (DB.community||[]).forEach(f=>DB.foods.push({id:f.id,n:f.n,c:f.c,p:f.p,u:f.u,src:'community',r:'COMMUNITY'}));
+}
+async function fetchCommunity(){
+  renderCommunity();
+  if(!SB) return;
+  try{
+    const {data,error}=await SB.from('community_foods').select('*').eq('hidden',false).order('created_at',{ascending:false}).limit(200);
+    if(error) return;
+    DB.community=(data||[]).map(f=>({id:60000+f.id,n:f.name+(f.brand?(' ('+f.brand+')'):''),c:Number(f.cal),p:Number(f.pro),u:f.unit||'1 serving',_cid:f.id,_flags:f.flags||0}));
+    mergeCommunity();
+    save(DB);
+    renderCommunity();
+  }catch(e){}
+}
+function renderCommunity(){
+  const box=document.getElementById('community-list'); if(!box) return;
+  const list=DB.community||[];
+  box.innerHTML='';
+  if(!list.length){ box.innerHTML='<div style="font-size:13px;color:var(--amber-faint);font-weight:700;padding:8px 0">No community foods yet — add the first one above, or tap REFRESH.</div>'; return; }
+  list.forEach(f=>{
+    const el=document.createElement('div'); el.className='community-item';
+    el.innerHTML='<div><div class="ci-name">'+esc(f.n)+'</div><div class="ci-meta">'+f.c+' cal · '+f.p+'g protein · '+esc(f.u)+(f._flags?' · 🚩'+f._flags:'')+'</div></div><div class="ci-actions"><button class="ci-btn" onclick="openSheet('+f.id+')">＋ LOG</button><button class="ci-btn flag" onclick="flagCommunity('+f._cid+')">🚩</button></div>';
+    box.appendChild(el);
+  });
+}
+async function addCommunityFood(){
+  const n=document.getElementById('cf-name').value.trim();
+  const brand=document.getElementById('cf-brand').value.trim();
+  const c=parseFloat(document.getElementById('cf-cal').value);
+  const pr=parseFloat(document.getElementById('cf-pro').value);
+  const u=document.getElementById('cf-unit').value.trim()||'1 serving';
+  if(!n||isNaN(c)||isNaN(pr)){ toast('NEED NAME + CALORIES + PROTEIN'); return; }
+  if(!SB){ toast('CLOUD NOT CONNECTED'); return; }
+  try{
+    const {error}=await SB.from('community_foods').insert({name:n,brand:brand||null,cal:c,pro:pr,unit:u});
+    if(error){ toast('FAILED TO ADD'); return; }
+    ['cf-name','cf-brand','cf-cal','cf-pro'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('cf-unit').value='1 serving';
+    toast('ADDED TO COMMUNITY \u2713');
+    fetchCommunity();
+  }catch(e){ toast('FAILED TO ADD'); }
+}
+async function flagCommunity(cid){
+  if(!SB){ toast('CLOUD NOT CONNECTED'); return; }
+  try{ await SB.rpc('flag_community_food',{food_id:cid}); toast('FLAGGED — THANKS'); fetchCommunity(); }
+  catch(e){ toast('FLAG FAILED'); }
+}
 // ============ DAILY ROLLOVER ============
 let lastDate=todayStr();
 function checkRollover(){
@@ -767,7 +880,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.visibilityState|
 if(typeof window!=='undefined'&&window.addEventListener) window.addEventListener('focus',checkRollover);
 setInterval(checkRollover,30000);
 // ============ INIT ============
-renderLog(); renderRestChips(); renderResults(''); renderMeta(); renderCombos(); maybeOnboard();
+renderLog(); renderRestChips(); renderResults(''); renderMeta(); renderCombos(); renderCommunity(); initCloud(); fetchCommunity(); maybeOnboard();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
