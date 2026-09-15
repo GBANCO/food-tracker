@@ -164,6 +164,25 @@ textarea::placeholder { color:var(--faint); }
 .rs-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .rs-title { font-size:20px; font-weight:900; font-family:'Arial Black',Arial,sans-serif; }
 .rs-close { background:none; border:3px solid var(--ink); color:var(--ink); width:40px; height:40px; font-size:18px; cursor:pointer; font-family:inherit; }
+/* info button + home-screen prompt + info sheet */
+.info-btn { flex:0 0 46px !important; min-width:46px; font-size:19px; font-weight:900; }
+#hs-wrap { position:fixed; inset:0; background:rgba(15,15,15,.7); z-index:500; display:none; }
+#hs-wrap.open { display:flex; align-items:center; justify-content:center; padding:20px; }
+#hs-card { width:100%; max-width:380px; background:var(--paper); border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:22px 20px; max-height:92dvh; overflow-y:auto; }
+.hs-title { font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:20px; text-align:center; margin-bottom:4px; }
+.hs-sub { font-size:13px; color:var(--muted); font-weight:700; text-align:center; margin-bottom:16px; }
+.hs-step { display:flex; gap:12px; align-items:flex-start; margin:12px 0; }
+.hs-num { flex:0 0 30px; height:30px; background:var(--ink); color:var(--paper); display:flex; align-items:center; justify-content:center; font-family:'Arial Black',Arial,sans-serif; font-weight:900; font-size:15px; }
+.hs-step-text { font-size:15px; font-weight:600; line-height:1.35; }
+.hs-step-text .big { font-weight:900; font-size:17px; }
+.hs-emoji { font-size:22px; line-height:1; margin-bottom:4px; }
+#info-wrap { position:fixed; inset:0; background:rgba(15,15,15,.55); z-index:220; display:none; }
+#info-wrap.open { display:flex; align-items:flex-end; }
+#info-sheet { width:100%; max-height:90dvh; overflow-y:auto; background:var(--paper); border-top:3px solid var(--ink); padding:16px 16px calc(20px + env(safe-area-inset-bottom)); }
+.why-row { display:flex; gap:12px; align-items:flex-start; border:3px solid var(--ink); background:var(--card); padding:12px; margin-bottom:10px; box-shadow:3px 3px 0 var(--ink); }
+.why-ico { font-size:24px; line-height:1; flex:0 0 auto; }
+.why-txt { font-size:14px; font-weight:600; line-height:1.35; }
+.why-txt b { font-family:'Arial Black',Arial,sans-serif; font-weight:900; }
 /* community */
 .community-item { display:flex; justify-content:space-between; align-items:center; border:3px solid var(--ink); background:var(--card); padding:12px; margin-bottom:10px; box-shadow:3px 3px 0 var(--ink); }
 .ci-name { font-size:15px; font-weight:800; }
@@ -297,6 +316,7 @@ textarea::placeholder { color:var(--faint); }
     </div>
   </main>
   <nav>
+    <button class="info-btn" onclick="openInfoSheet()" title="Why is this a web app?">ⓘ</button>
     <button id="nav-log" class="active" onclick="showTab('log')">LOG</button>
     <button id="nav-trends" onclick="showTab('trends')">TRENDS</button>
     <button id="nav-foods" onclick="showTab('foods')">FOODS</button>
@@ -313,6 +333,20 @@ textarea::placeholder { color:var(--faint); }
       <input type="number" id="sheet-qty" inputmode="decimal" step="0.5" value="1">
       <button class="btn" style="flex-shrink:0" onclick="confirmAdd()">[ LOG IT ]</button>
     </div>
+  </div>
+</div>
+<div id="info-wrap" onclick="if(event.target===this)closeInfoSheet()">
+  <div id="info-sheet">
+    <div class="rs-head">
+      <div class="rs-title">ⓘ ABOUT FUEL</div>
+      <button class="rs-close" onclick="closeInfoSheet()">✕</button>
+    </div>
+    <div class="why-row"><div class="why-ico">💾</div><div class="why-txt"><b>YOUR DATA STAYS ON YOUR PHONE.</b> No account, no server, no tracking. Everything lives in your own browser.</div></div>
+    <div class="why-row"><div class="why-ico">⚡</div><div class="why-txt"><b>INSTANT UPDATES.</b> New foods & features ship the moment they're ready — no waiting for an App Store review.</div></div>
+    <div class="why-row"><div class="why-ico">📶</div><div class="why-txt"><b>WORKS OFFLINE.</b> Open it in airplane mode — your log, goals and streaks still work.</div></div>
+    <div class="why-row"><div class="why-ico">💰</div><div class="why-txt"><b>FREE, WITH NO 30% CUT.</b> App Store apps pay 30% to Apple — we'd rather keep FUEL free for you.</div></div>
+    <div class="why-row"><div class="why-ico">📱</div><div class="why-txt"><b>IT FEELS NATIVE.</b> Once you Add to Home Screen, it launches full-screen with its own icon — just like an app.</div></div>
+    <button class="btn block" onclick="openHomeScreenPrompt()">[ HOW TO ADD TO HOME SCREEN ]</button>
   </div>
 </div>
 <div id="report-wrap" onclick="if(event.target===this)closeReportSheet()">
@@ -344,6 +378,20 @@ textarea::placeholder { color:var(--faint); }
         <button class="btn block dim" id="admin-btn" onclick="toggleAdmin()">[ UNLOCK OPERATOR MODE ]</button>
       </div>
     </div>
+  </div>
+</div>
+<div id="hs-wrap" onclick="if(event.target===this)dismissHomeScreen()">
+  <div id="hs-card">
+    <div class="hs-title">📲 ADD FUEL TO YOUR HOME SCREEN</div>
+    <div class="hs-sub" id="hs-sub">SO IT LAUNCHES FULL-SCREEN, LIKE A REAL APP</div>
+    <div class="hs-step"><div class="hs-num">1</div><div class="hs-step-text"><div class="hs-emoji" id="hs-e1">⬆️</div><span class="big">Tap the Share button</span> at the bottom of Safari.</div></div>
+    <div class="hs-step"><div class="hs-num">2</div><div class="hs-step-text"><div class="hs-emoji">➕</div><span class="big">Scroll & tap "Add to Home Screen"</span>.</div></div>
+    <div class="hs-step"><div class="hs-num">3</div><div class="hs-step-text"><div class="hs-emoji">✅</div><span class="big">Tap "Add"</span> — FUEL appears on your home screen with its own icon.</div></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn block dim" onclick="dismissHomeScreen()">MAYBE LATER</button>
+      <button class="btn block" onclick="dismissHomeScreen()">GOT IT ✓</button>
+    </div>
+    <div class="ob-note" style="text-align:center">ANDROID USERS: TAP THE ⋮ MENU → "ADD TO HOME SCREEN".</div>
   </div>
 </div>
 <div id="onboard" class="hidden">
@@ -462,8 +510,8 @@ function mergeDining(d){
   d.diningVer = DINING_VERSION;
   return d;
 }
-function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods){ if(!d.reports)d.reports=[]; if(!d.combos)d.combos=[]; if(!d.community)d.community=[]; if(!('onboarded' in d))d.onboarded=!!d.settings; return mergeDining(d); } }catch(e){} return mergeDining(seed()); }
-function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:90000,reports:[],combos:[],community:[],settings:null,onboarded:false}; save(d); return d; }
+function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.foods){ if(!d.reports)d.reports=[]; if(!d.combos)d.combos=[]; if(!d.community)d.community=[]; if(!('hsPrompted' in d))d.hsPrompted=false; if(!('onboarded' in d))d.onboarded=!!d.settings; return mergeDining(d); } }catch(e){} return mergeDining(seed()); }
+function seed(){ const d={foods:SEED_FOODS.map((f,i)=>({id:i+1,...f})),entries:[],weights:[{d:todayStr(),kg:57.5}],recent:[],nextId:90000,reports:[],combos:[],community:[],settings:null,onboarded:false,hsPrompted:false}; save(d); return d; }
 function save(d){ try{ localStorage.setItem(KEY,JSON.stringify(d)); }catch(e){ toast('STORAGE ERROR'); } }
 let DB=load();
 // ============ HELPERS ============
@@ -773,6 +821,7 @@ function finishOnboard(){
   save(DB);
   document.getElementById('onboard').classList.add('hidden');
   renderLog(); toast('TARGETS LOCKED IN \u2713');
+  maybeShowHomeScreen();
 }
 function maybeOnboard(){ if(!DB.onboarded) document.getElementById('onboard').classList.remove('hidden'); }
 function renderSettings(){
@@ -893,6 +942,30 @@ async function flagCommunity(cid){
   try{ await SB.rpc('flag_community_food',{food_id:cid}); toast('FLAGGED — THANKS'); fetchCommunity(); }
   catch(e){ toast('FLAG FAILED'); }
 }
+// ============ HOME SCREEN + INFO ============
+function isStandalone(){ return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (navigator.standalone === true); }
+function isAndroid(){ return /Android/i.test(navigator.userAgent); }
+function openInfoSheet(){ document.getElementById('info-wrap').classList.add('open'); }
+function closeInfoSheet(){ document.getElementById('info-wrap').classList.remove('open'); }
+function openHomeScreenPrompt(){
+  closeInfoSheet();
+  // tailor instructions to platform
+  if(isAndroid()){
+    document.getElementById('hs-e1').textContent='⋮';
+    document.querySelector('#hs-card .hs-step-text .big').textContent='Tap the ⋮ menu (top-right)';
+    document.getElementById('hs-sub').textContent='SO IT LAUNCHES FULL-SCREEN, LIKE A REAL APP';
+  }
+  document.getElementById('hs-wrap').classList.add('open');
+}
+function dismissHomeScreen(){
+  document.getElementById('hs-wrap').classList.remove('open');
+  DB.hsPrompted=true; save(DB);
+}
+function maybeShowHomeScreen(){
+  if(DB.hsPrompted) return;
+  if(isStandalone()){ DB.hsPrompted=true; save(DB); return; }  // already installed
+  openHomeScreenPrompt();
+}
 // ============ DAILY ROLLOVER ============
 let lastDate=todayStr();
 function checkRollover(){
@@ -904,6 +977,7 @@ if(typeof window!=='undefined'&&window.addEventListener) window.addEventListener
 setInterval(checkRollover,30000);
 // ============ INIT ============
 renderLog(); renderHallChips(); renderRestChips(); renderResults(''); renderMeta(); renderCombos(); renderCommunity(); initCloud(); fetchCommunity(); maybeOnboard();
+if(DB.onboarded) maybeShowHomeScreen();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
