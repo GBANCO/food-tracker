@@ -534,6 +534,22 @@ function initCloud(){
   if(SUPABASE_URL.indexOf('YOUR-PROJECT')>=0) return;
   try{ SB=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){ SB=null; }
 }
+// ============ VISIT COUNTER (anonymous) ============
+function deviceId(){
+  try{ let id=localStorage.getItem('fuel_device_id'); if(id) return id;
+    id=(crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.floor(Math.random()*1e9));
+    localStorage.setItem('fuel_device_id',id); return id; }
+  catch(e){ return 'dev-'+Date.now()+'-'+Math.floor(Math.random()*1e9); }
+}
+async function pingVisit(){
+  if(!SB) return;
+  try{
+    const last=parseInt(localStorage.getItem('fuel_last_ping')||'0',10);
+    if(Date.now()-last < 3600000) return; // throttle to 1/hr
+    await SB.from('visits').insert({device_id:deviceId()});
+    localStorage.setItem('fuel_last_ping',String(Date.now()));
+  }catch(e){ /* silent — never block the app on analytics */ }
+}
 function dayTotals(dtStr){ let p=0,c=0; for(const e of DB.entries){ if(e.d===dtStr){p+=e.p;c+=e.c;} } return {p:Math.round(p),c:Math.round(c)}; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
 function fmtDay(dtStr){ return new Date(dtStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'}).toUpperCase(); }
@@ -991,7 +1007,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.visibilityState|
 if(typeof window!=='undefined'&&window.addEventListener) window.addEventListener('focus',checkRollover);
 setInterval(checkRollover,30000);
 // ============ INIT ============
-renderLog(); renderHallChips(); renderRestChips(); renderResults(''); renderMeta(); renderCombos(); renderCommunity(); initCloud(); fetchCommunity(); maybeOnboard();
+renderLog(); renderHallChips(); renderRestChips(); renderResults(''); renderMeta(); renderCombos(); renderCommunity(); initCloud(); fetchCommunity(); pingVisit(); maybeOnboard();
 if(DB.onboarded) maybeShowHomeScreen();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
