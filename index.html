@@ -346,7 +346,8 @@ textarea::placeholder { color:var(--faint); }
     <div class="why-row"><div class="why-ico">📶</div><div class="why-txt"><b>WORKS OFFLINE.</b> Open it in airplane mode — your log, goals and streaks still work.</div></div>
     <div class="why-row"><div class="why-ico">💰</div><div class="why-txt"><b>FREE, WITH NO 30% CUT.</b> App Store apps pay 30% to Apple — we'd rather keep FUEL free for you.</div></div>
     <div class="why-row"><div class="why-ico">📱</div><div class="why-txt"><b>IT FEELS NATIVE.</b> Once you Add to Home Screen, it launches full-screen with its own icon — just like an app.</div></div>
-    <button class="btn block" onclick="openHomeScreenPrompt()">[ HOW TO ADD TO HOME SCREEN ]</button>
+    <button class="btn block" onclick="shareApp()" style="margin-bottom:8px">📤 SHARE FUEL WITH A FRIEND</button>
+    <button class="btn block dim" onclick="openHomeScreenPrompt()">[ HOW TO ADD TO HOME SCREEN ]</button>
   </div>
 </div>
 <div id="report-wrap" onclick="if(event.target===this)closeReportSheet()">
@@ -387,7 +388,8 @@ textarea::placeholder { color:var(--faint); }
     <div class="hs-step"><div class="hs-num">1</div><div class="hs-step-text"><div class="hs-emoji" id="hs-e1">⬆️</div><span class="big">Tap the Share button</span> at the bottom of Safari.</div></div>
     <div class="hs-step"><div class="hs-num">2</div><div class="hs-step-text"><div class="hs-emoji">➕</div><span class="big">Scroll & tap "Add to Home Screen"</span>.</div></div>
     <div class="hs-step"><div class="hs-num">3</div><div class="hs-step-text"><div class="hs-emoji">✅</div><span class="big">Tap "Add"</span> — FUEL appears on your home screen with its own icon.</div></div>
-    <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn block" onclick="shareApp()" style="margin-top:16px">📤 SHARE FUEL WITH A FRIEND</button>
+    <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn block dim" onclick="dismissHomeScreen()">MAYBE LATER</button>
       <button class="btn block" onclick="dismissHomeScreen()">GOT IT ✓</button>
     </div>
@@ -941,6 +943,19 @@ async function flagCommunity(cid){
   if(!SB){ toast('CLOUD NOT CONNECTED'); return; }
   try{ await SB.rpc('flag_community_food',{food_id:cid}); toast('FLAGGED — THANKS'); fetchCommunity(); }
   catch(e){ toast('FLAG FAILED'); }
+}
+// ============ SHARING ============
+const SHARE_URL='https://gbanco.github.io/food-tracker/';
+async function shareApp(){
+  const data={title:'FUEL://NUTRITION',text:'Track protein & calories against IU dining hall menus — free, no account, works offline.',url:SHARE_URL};
+  if(navigator.share){
+    try{ await navigator.share(data); }catch(e){ /* cancelled */ }
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    try{ await navigator.clipboard.writeText(SHARE_URL); toast('LINK COPIED \u2713'); }
+    catch(e){ prompt('COPY THIS LINK:',SHARE_URL); }
+  } else {
+    prompt('COPY THIS LINK:',SHARE_URL);
+  }
 }
 // ============ HOME SCREEN + INFO ============
 function isStandalone(){ return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (navigator.standalone === true); }
