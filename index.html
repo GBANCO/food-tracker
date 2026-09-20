@@ -583,17 +583,24 @@ function renderLog(){
   const rc=document.getElementById('recent-chips'); rc.innerHTML='';
   DB.recent.forEach(fid=>{ const f=DB.foods.find(x=>x.id===fid); if(!f)return;
     const chip=document.createElement('span'); chip.className='recent-chip'; chip.textContent=f.n+' +';
-    chip.title='Tap to log · hold to remove';
-    let longPressed=false, lpTimer=null;
-    const cancel=()=>{ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } };
+    chip.title='Tap to log · swipe to remove';
     const remove=()=>{ if(confirm('REMOVE "'+f.n+'" FROM RECENTS?')){ DB.recent=DB.recent.filter(x=>x!==fid); save(DB); renderLog(); toast('REMOVED FROM RECENTS'); } };
-    chip.addEventListener('pointerdown',(e)=>{ longPressed=false; cancel(); lpTimer=setTimeout(()=>{ longPressed=true; lpTimer=null; remove(); },550); });
-    chip.addEventListener('pointerup',cancel);
-    chip.addEventListener('pointermove',(e)=>{ /* allow small movement; cancel only on large drag */ });
-    chip.addEventListener('pointerleave',cancel);
-    chip.addEventListener('pointercancel',cancel);
+    let startX=null, startY=null, swiped=false;
+    chip.addEventListener('pointerdown',(e)=>{ startX=e.clientX; startY=e.clientY; swiped=false; });
+    chip.addEventListener('pointermove',(e)=>{
+      if(startX===null) return;
+      const dx=e.clientX-startX, dy=e.clientY-startY;
+      if(Math.abs(dx)>=40 && Math.abs(dx)>Math.abs(dy)*1.3){  // horizontal swipe wins
+        swiped=true; startX=null; remove();
+      } else if(Math.abs(dy)>=40){  // vertical scroll — abort
+        startX=null; startY=null;
+      }
+    });
+    chip.addEventListener('pointerup',()=>{ startX=null; startY=null; });
+    chip.addEventListener('pointerleave',()=>{ startX=null; startY=null; });
+    chip.addEventListener('pointercancel',()=>{ startX=null; startY=null; });
     chip.addEventListener('contextmenu',(e)=>{ e.preventDefault(); remove(); });
-    chip.onclick=()=>{ if(longPressed){ longPressed=false; return; } openSheet(fid); };
+    chip.onclick=()=>{ if(swiped){ swiped=false; return; } openSheet(fid); };
     rc.appendChild(chip); });
   // today log
   const tl=document.getElementById('today-log'); tl.innerHTML='';
