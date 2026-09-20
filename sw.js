@@ -1,5 +1,5 @@
 // FUEL://NUTRITION — offline-first service worker
-const CACHE = 'fuel-v14';
+const CACHE = 'fuel-v15';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html', './dining.js'])).then(() => self.skipWaiting()));
 });
