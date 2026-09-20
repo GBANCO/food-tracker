@@ -105,7 +105,7 @@ input::placeholder { color:var(--faint); }
 /* workout banner */
 .hidden { display:none !important; }
 .section-title { font-size:12px; color:var(--muted); letter-spacing:1px; margin:16px 0 8px; font-weight:900; text-transform:uppercase; font-family:'Arial Black',Arial,sans-serif; }
-.recent-chip { display:inline-block; border:3px solid var(--ink); background:var(--yellow); color:var(--ink); padding:8px 12px; margin:0 8px 8px 0; font-size:13px; font-weight:900; cursor:pointer; min-height:40px; box-shadow:2px 2px 0 var(--ink); }
+.recent-chip { display:inline-block; border:3px solid var(--ink); background:var(--yellow); color:var(--ink); padding:8px 12px; margin:0 8px 8px 0; font-size:13px; font-weight:900; cursor:pointer; min-height:40px; box-shadow:2px 2px 0 var(--ink); user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; touch-action:manipulation; }
 .recent-chip:active { transform:translate(2px,2px); box-shadow:none; }
 /* combo chips */
 .combo-chip { display:inline-flex; align-items:center; gap:8px; border:3px solid var(--ink); background:var(--teal); color:var(--ink); padding:9px 12px; margin:0 8px 8px 0; font-size:13px; font-weight:900; cursor:pointer; min-height:42px; box-shadow:3px 3px 0 var(--ink); }
@@ -583,7 +583,18 @@ function renderLog(){
   const rc=document.getElementById('recent-chips'); rc.innerHTML='';
   DB.recent.forEach(fid=>{ const f=DB.foods.find(x=>x.id===fid); if(!f)return;
     const chip=document.createElement('span'); chip.className='recent-chip'; chip.textContent=f.n+' +';
-    chip.onclick=()=>openSheet(fid); rc.appendChild(chip); });
+    chip.title='Tap to log · hold to remove';
+    let longPressed=false, lpTimer=null;
+    const cancel=()=>{ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } };
+    const remove=()=>{ if(confirm('REMOVE "'+f.n+'" FROM RECENTS?')){ DB.recent=DB.recent.filter(x=>x!==fid); save(DB); renderLog(); toast('REMOVED FROM RECENTS'); } };
+    chip.addEventListener('pointerdown',(e)=>{ longPressed=false; cancel(); lpTimer=setTimeout(()=>{ longPressed=true; lpTimer=null; remove(); },550); });
+    chip.addEventListener('pointerup',cancel);
+    chip.addEventListener('pointermove',(e)=>{ /* allow small movement; cancel only on large drag */ });
+    chip.addEventListener('pointerleave',cancel);
+    chip.addEventListener('pointercancel',cancel);
+    chip.addEventListener('contextmenu',(e)=>{ e.preventDefault(); remove(); });
+    chip.onclick=()=>{ if(longPressed){ longPressed=false; return; } openSheet(fid); };
+    rc.appendChild(chip); });
   // today log
   const tl=document.getElementById('today-log'); tl.innerHTML='';
   const today=DB.entries.filter(e=>e.d===todayStr());
