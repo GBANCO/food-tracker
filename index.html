@@ -190,46 +190,88 @@ textarea::placeholder { color:var(--faint); }
 .ci-btn { background:var(--card); border:3px solid var(--ink); color:var(--ink); font-family:'Arial Black',Arial,sans-serif; font-size:12px; font-weight:900; padding:7px 9px; cursor:pointer; box-shadow:2px 2px 0 var(--ink); }
 .ci-btn.flag { color:var(--warn); }
 .ci-btn:active { transform:translate(2px,2px); box-shadow:none; }
+/* Home / bold & familiar */
+main {padding:calc(env(safe-area-inset-top) + 25px) 20px calc(104px + env(safe-area-inset-bottom));}
+#main>div {max-width:480px;margin:0 auto;}
+.panel {border-width:2px;box-shadow:3px 3px 0 var(--ink);}
+.home-summary {padding:20px;margin-bottom:22px;box-shadow:4px 4px 0 var(--ink);}
+.home-protein-head,.home-protein-number,.home-calories,.home-section-head,.home-footer {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.home-protein-head h2 {font:850 11px Arial,sans-serif;letter-spacing:1px;margin:0;color:var(--ink);}
+.home-protein-head>span {font-size:12px;color:var(--muted);}
+.home-protein-number {align-items:baseline;margin:10px 0 14px;}
+.home-protein-number strong {font-size:48px;font-weight:850;letter-spacing:-2px;line-height:1.1;}
+.home-protein-number strong span {font-size:25px;letter-spacing:-1px;}
+.home-protein-number>span {font-size:12px;font-weight:850;}
+.home-summary .bar-track {height:10px;border:0;background:#edece5;}
+.home-summary .bar-grad {background:var(--yellow);}
+.home-summary .bar-cover {background:#edece5;}
+.home-summary .bar-edge {display:none;}
+.home-calories {border-top:1px solid #e6e5dd;margin-top:20px;padding-top:16px;}
+.home-calories b {font-size:11px;letter-spacing:.7px;}
+.home-calories strong {font-size:23px;font-weight:850;letter-spacing:-.7px;}
+.home-calories span {font-size:12px;color:var(--muted);}
+.home-remaining {font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px;}
+.home-add.btn {display:flex;align-items:center;text-align:left;gap:10px;border-width:2px;background:var(--yellow);padding:16px 13px;margin:0 0 25px;font:850 12px Arial,sans-serif;letter-spacing:.2px;}
+.home-plus {font-size:24px;line-height:18px;}
+.home-add small {margin-left:auto;font-size:9px;font-weight:650;opacity:.55;letter-spacing:0;}
+.home-section-head {margin:0 0 12px;}
+.home-section-head h2 {font:850 11px Arial,sans-serif;letter-spacing:1px;margin:0;}
+.home-section-head>span {font-size:10px;color:var(--muted);}
+.home-quick {margin-bottom:24px;}
+#recent-chips,#combo-chips {display:flex;flex-wrap:wrap;gap:8px;}
+.recent-chip,.combo-chip {border-width:1.5px;box-shadow:none;background:white;font-size:11px;padding:10px;margin:0;min-height:42px;font-weight:700;letter-spacing:0;}
+.combo-chip {background:#f0eee4;}
+.home-meals {padding:0;margin-bottom:14px;}
+.meal-group {padding:16px;}
+.meal-group+.meal-group {border-top:1px solid #e6e5dd;}
+.meal-group-head {display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;margin-bottom:5px;}
+.meal-group-head button {background:none;border:0;font-size:23px;min-width:44px;min-height:44px;line-height:1;color:var(--muted);}
+.meal-subtotal {font-size:10px;font-weight:750;text-align:right;color:var(--muted);margin-top:10px;}
+.home-meals .entry {border:0;padding:7px 0;align-items:flex-start;gap:6px;}
+.home-meals .etime {font-size:10px;width:34px;padding-top:3px;}
+.home-meals .ename {font-size:13px;font-weight:550;padding:0;line-height:1.45;}
+.home-meals .evals {font-size:11px;max-width:90px;line-height:1.5;flex-shrink:0;}
+.home-meals .edel {border:0;background:none;font-size:14px;padding:0;min-width:28px;min-height:28px;line-height:1;}
+.home-footer {font-size:9px;color:#77796e;letter-spacing:.2px;}
+.home-footer button {font:700 9px Arial,sans-serif;background:none;border:0;padding:10px 0;min-height:44px;color:var(--muted);}
+.home-empty {padding:27px 20px;color:var(--muted);font-size:13px;line-height:1.6;}
+.home-empty strong {display:block;color:var(--ink);font-size:16px;margin-bottom:5px;}
+nav {border-top:1px solid #d8d7cb;max-width:520px;left:50%;right:auto;width:100%;transform:translateX(-50%);padding:10px 14px calc(12px + env(safe-area-inset-bottom));}
+nav button {border:0;font:750 10px Arial,sans-serif;letter-spacing:.3px;padding:7px 3px;color:#818276;min-height:54px;}
+nav button.active {background:var(--ink);color:var(--paper);}
+.nav-symbol {display:block;font-size:21px;line-height:24px;margin-bottom:4px;}
+.home-overlay {display:none;position:fixed;inset:0;z-index:180;background:#0f0f0f77;align-items:flex-end;justify-content:center;}
+.home-overlay.open {display:flex;}
+.home-sheet {background:var(--paper);border:2px solid var(--ink);border-bottom:0;width:100%;max-width:520px;max-height:90dvh;overflow:auto;overscroll-behavior:contain;padding:20px 18px calc(24px + env(safe-area-inset-bottom));}
+.home-sheet h2 {font-size:18px;letter-spacing:-.4px;}
+#more-wrap .btn {margin-top:12px;font-size:12px;border-width:2px;}
+#sheet,#report-sheet,#info-sheet {max-width:520px;margin:0 auto;max-height:90dvh;overflow:auto;}
+.rs-close {min-width:44px;min-height:44px;}
+@media(max-width:360px){main{padding-left:14px;padding-right:14px}.home-add small{font-size:8px}.home-add.btn{font-size:11px;gap:6px}.home-protein-head>span{font-size:11px}.home-meals .etime{display:none}}
 </style>
 </head>
 <body>
 <div id="app">
-  <header>
-    <div class="hdr-left">
-      <div class="logo">⚡FUEL</div>
-      <button class="bug-btn" onclick="openReportSheet()" title="Report a bug"><span class="bug-ico">⚠️</span><span class="bug-lbl">REPORT</span></button>
-    </div>
-    <div class="streak-hero">
-      <div class="flame">🔥</div>
-      <div><div class="num" id="hdr-streak-num">0</div><div class="lbl">DAY STREAK</div></div>
-    </div>
-  </header>
+  <span id="hdr-streak-num" class="hidden" aria-hidden="true">0</span>
   <main id="main">
     <!-- TAB: LOG -->
     <div id="tab-log">
-      <div class="panel">
-        <h2>TODAY'S TOTALS</h2>
-        <div class="bar-row">
-          <div class="bar-label"><span>PROTEIN</span><span id="p-val">0/115g</span></div>
-          <div class="bar-track" id="p-track"><div class="bar-grad"></div><div class="bar-cover" id="p-cover"></div><div class="bar-edge" id="p-edge"></div></div>
-        </div>
-        <div class="bar-row" style="margin-bottom:0">
-          <div class="bar-label"><span>CALORIES</span><span id="c-val">0/2100</span></div>
-          <div class="bar-track" id="c-track"><div class="bar-grad"></div><div class="bar-cover" id="c-cover"></div><div class="bar-edge" id="c-edge"></div></div>
-        </div>
-      </div>
-      <div class="section-title">QUICK ADD (RECENT)</div>
-      <div id="recent-chips"></div>
-      <div class="section-title">MEAL COMBOS (1-TAP)</div>
-      <div id="combo-chips"></div>
-      <button class="btn block dim" onclick="saveTodayAsCombo()" style="margin-bottom:4px">＋ SAVE TODAY AS COMBO</button>
-      <div class="section-title">SEARCH FOOD DB</div>
-      <div class="rest-chips" id="hall-chips"></div>
-      <div class="rest-chips" id="rest-chips"></div>
-      <input type="search" id="search" placeholder="> type food name..." autocomplete="off" autocapitalize="off" spellcheck="false">
-      <div id="search-results" class="panel" style="margin-top:8px"></div>
-      <div class="section-title">TODAY'S LOG</div>
-      <div class="panel" id="today-log" style="padding:4px 12px"></div>
+      <section class="home-summary panel" aria-label="Daily nutrition totals">
+        <div class="home-protein-head"><h2>PROTEIN</h2><span id="home-protein-goal"></span></div>
+        <div class="home-protein-number"><strong id="home-protein-total">0<span>g</span></strong><span id="home-protein-left"></span></div>
+        <span id="p-val" class="hidden"></span>
+        <div class="bar-track" id="p-track" role="progressbar" aria-label="Daily protein"><div class="bar-grad"></div><div class="bar-cover" id="p-cover"></div><div class="bar-edge" id="p-edge"></div></div>
+        <div class="home-calories"><b>CALORIES</b><div><strong id="home-calorie-total">0</strong><span id="home-calorie-goal"></span></div></div>
+        <span id="c-val" class="hidden"></span>
+        <div class="bar-track hidden" id="c-track"><div class="bar-grad"></div><div class="bar-cover" id="c-cover"></div><div class="bar-edge" id="c-edge"></div></div>
+        <p id="home-calorie-left" class="home-remaining"></p>
+      </section>
+      <button class="home-add btn block" onclick="openFoodSearch()"><span class="home-plus">＋</span><span>SEARCH / ADD FOOD</span><small>IU DINING + MORE ↗</small></button>
+      <section id="home-recents" class="home-quick hidden"><div class="home-section-head"><h2>YOUR GO-TOS</h2><span>RECENT FOODS</span></div><div id="recent-chips"></div></section>
+      <section id="home-combos" class="home-quick hidden"><div class="home-section-head"><h2>SAVED MEALS</h2><span>1-TAP ADD</span></div><div id="combo-chips"></div></section>
+      <div class="home-section-head"><h2>TODAY’S MEALS</h2><span id="home-meal-count"></span></div>
+      <div class="panel home-meals" id="today-log"></div>
+      <div class="home-footer"><span id="home-save-status">SAVED ON THIS DEVICE</span><button onclick="saveTodayAsCombo()" id="home-save-combo" class="hidden">＋ SAVE AS COMBO</button></div>
     </div>
     <!-- TAB: TRENDS -->
     <div id="tab-trends" class="hidden">
@@ -313,13 +355,31 @@ textarea::placeholder { color:var(--faint); }
       </div>
     </div>
   </main>
-  <nav>
-    <button class="info-btn" onclick="openInfoSheet()" title="Why is this a web app?">ⓘ</button>
-    <button id="nav-log" class="active" onclick="showTab('log')">LOG</button>
-    <button id="nav-trends" onclick="showTab('trends')">TRENDS</button>
-    <button id="nav-foods" onclick="showTab('foods')">FOODS</button>
-    <button id="nav-community" onclick="showTab('community')">COMMUNITY</button>
+  <nav aria-label="Main navigation">
+    <button id="nav-log" class="active" onclick="showTab('log')"><span class="nav-symbol" aria-hidden="true">⌂</span>TODAY</button>
+    <button id="nav-trends" onclick="showTab('trends')"><span class="nav-symbol" aria-hidden="true">↗</span>TRENDS</button>
+    <button id="nav-foods" onclick="showTab('foods')"><span class="nav-symbol" aria-hidden="true">▤</span>MY FOODS</button>
+    <button id="nav-community" onclick="openMoreMenu()"><span class="nav-symbol" aria-hidden="true">☷</span>MORE</button>
   </nav>
+</div>
+<div id="food-search-wrap" class="home-overlay" onclick="if(event.target===this)closeFoodSearch()">
+  <section class="home-sheet" role="dialog" aria-modal="true" aria-labelledby="food-search-title">
+    <div class="rs-head"><h2 id="food-search-title">ADD FOOD</h2><button class="rs-close" onclick="closeFoodSearch()" aria-label="Close food search">✕</button></div>
+    <input type="search" id="search" placeholder="Search a food…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="section-title">FILTER BY DINING HALL</div><div class="rest-chips" id="hall-chips"></div><div class="rest-chips" id="rest-chips"></div>
+    <div id="search-results" class="panel" style="margin-top:12px"></div>
+    <button class="btn block dim" onclick="closeFoodSearch();showTab('community')">＋ CREATE A FOOD / COMMUNITY</button>
+  </section>
+</div>
+<div id="more-wrap" class="home-overlay" onclick="if(event.target===this)closeMoreMenu()">
+  <section class="home-sheet" role="dialog" aria-modal="true" aria-labelledby="more-title">
+    <div class="rs-head"><h2 id="more-title">MORE</h2><button class="rs-close" onclick="closeMoreMenu()" aria-label="Close menu">✕</button></div>
+    <div class="stat-line"><span>LOGGING STREAK</span><span id="more-streak">0 DAYS</span></div>
+    <button class="btn block" onclick="closeMoreMenu();showTab('community')">COMMUNITY / ADD CUSTOM FOOD</button>
+    <button class="btn block dim" onclick="closeMoreMenu();showTab('foods');document.getElementById('set-goal').scrollIntoView({block:'center'})">SETTINGS & BACKUPS</button>
+    <button class="btn block dim" onclick="closeMoreMenu();openReportSheet()">REPORT A BUG / SEND AN IDEA</button>
+    <button class="btn block dim" onclick="closeMoreMenu();openInfoSheet()">ABOUT FUEL / INSTALL APP</button>
+  </section>
 </div>
 <div id="sheet-wrap" onclick="if(event.target===this)closeSheet()">
   <div id="sheet">
@@ -518,7 +578,7 @@ function todayStr(off=0){ const dt=new Date(); dt.setDate(dt.getDate()+off); ret
 function baseCal(){ return (DB.settings&&DB.settings.calGoal)||2100; }
 function calGoal(){ return baseCal(); }
 function proGoal(){ return (DB.settings&&DB.settings.proGoal)||115; }
-const APP_VERSION='1.3.0';
+const APP_VERSION='1.4.0';
 // ============ CLOUD (Supabase) ============
 const SUPABASE_URL='https://oacrbrsqvsulhwgpqiqv.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hY3JicnNxdnN1bGh3Z3BxaXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzMzg5MDUsImV4cCI6MjEwNDkxNDkwNX0.99Fh1itRcPJ9HtRUO0Vo15N_UAYBTpWQtcElsPqkTxk';
@@ -547,6 +607,43 @@ async function pingVisit(){
 function dayTotals(dtStr){ let p=0,c=0; for(const e of DB.entries){ if(e.d===dtStr){p+=e.p;c+=e.c;} } return {p:Math.round(p),c:Math.round(c)}; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
 function fmtDay(dtStr){ return new Date(dtStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'}).toUpperCase(); }
+// ============ HOME SEARCH / MORE ============
+let homeReturnFocus=null;
+function openFoodSearch(){
+  homeReturnFocus=document.activeElement;
+  document.getElementById('food-search-wrap').classList.add('open');
+  renderResults(searchEl.value.trim().toLowerCase());searchEl.focus();
+}
+function closeFoodSearch(){
+  document.getElementById('food-search-wrap').classList.remove('open');
+  if(homeReturnFocus&&homeReturnFocus.isConnected)homeReturnFocus.focus();
+}
+function openMoreMenu(){
+  homeReturnFocus=document.activeElement;
+  document.getElementById('more-streak').textContent=document.getElementById('hdr-streak-num').textContent+' DAYS';
+  document.getElementById('more-wrap').classList.add('open');
+  document.querySelector('#more-wrap .rs-close').focus();
+}
+function closeMoreMenu(){
+  document.getElementById('more-wrap').classList.remove('open');
+  if(homeReturnFocus&&homeReturnFocus.isConnected)homeReturnFocus.focus();
+}
+// Keep keyboard focus inside the frontmost sheet.
+document.addEventListener('keydown',e=>{
+  const ids=['hs-wrap','onboard','info-wrap','report-wrap','sheet-wrap','more-wrap','food-search-wrap'];
+  const front=ids.map(id=>document.getElementById(id)).find(el=>el&&(el.classList.contains('open')||(el.id==='onboard'&&!el.classList.contains('hidden'))));
+  if(!front)return;
+  if(e.key==='Escape'){
+    const close={'food-search-wrap':closeFoodSearch,'more-wrap':closeMoreMenu,'sheet-wrap':closeSheet,'report-wrap':closeReportSheet,'info-wrap':closeInfoSheet,'hs-wrap':dismissHomeScreen}[front.id];
+    if(close){e.preventDefault();close();}return;
+  }
+  if(e.key==='Tab'){
+    const nodes=[...front.querySelectorAll('button,input,textarea,[tabindex="0"]')].filter(n=>n.getClientRects().length&&!n.disabled);
+    if(!nodes.length)return;const first=nodes[0],last=nodes[nodes.length-1];
+    if(e.shiftKey&&(document.activeElement===first||!front.contains(document.activeElement))){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&(document.activeElement===last||!front.contains(document.activeElement))){e.preventDefault();first.focus();}
+  }
+});
 // ============ TABS ============
 function showTab(t){
   ['log','trends','foods','community'].forEach(x=>{
@@ -569,12 +666,21 @@ function renderLED(prefix, value, goal) {
   return pct;
 }
 function renderLog(){
+  renderCombos();
   const t=dayTotals(todayStr());
   const cg=calGoal();
   const ppct = renderLED('p', t.p, proGoal());
   const cpct = renderLED('c', t.c, cg);
   document.getElementById('p-val').innerHTML=`${t.p}/${proGoal()}g <span class="bl-pct">${ppct}%</span>`;
   document.getElementById('c-val').innerHTML=`${t.c}/${cg} <span class="bl-pct">${cpct}%</span>`;
+  document.getElementById('home-protein-goal').textContent='Daily target · '+proGoal()+'g';
+  document.getElementById('home-protein-total').innerHTML=t.p+'<span>g</span>';
+  document.getElementById('home-protein-left').textContent=t.p>=proGoal()?'TARGET REACHED ✓':(proGoal()-t.p)+'g TO GO ↗';
+  document.getElementById('home-calorie-total').textContent=t.c.toLocaleString();
+  document.getElementById('home-calorie-goal').textContent=' / '+cg.toLocaleString();
+  document.getElementById('home-calorie-left').textContent=t.c>cg?(t.c-cg).toLocaleString()+' cal above your daily target.':(cg-t.c).toLocaleString()+' cal left for the rest of your day.';
+  const proteinTrack=document.getElementById('p-track');
+  proteinTrack.setAttribute('aria-valuemin','0');proteinTrack.setAttribute('aria-valuemax',String(proGoal()));proteinTrack.setAttribute('aria-valuenow',String(Math.min(t.p,proGoal())));
   // streak
   let streak=0;
   for(let i=0;i<365;i++){ const d=todayStr(-i); if(DB.entries.some(e=>e.d===d)) streak++; else if(i>0) break; }
@@ -602,15 +708,30 @@ function renderLog(){
     chip.addEventListener('contextmenu',(e)=>{ e.preventDefault(); remove(); });
     chip.onclick=()=>{ if(swiped){ swiped=false; return; } openSheet(fid); };
     rc.appendChild(chip); });
-  // today log
+  document.getElementById('home-recents').classList.toggle('hidden',!rc.children.length);
+  // Group existing entries by log time without changing stored records.
   const tl=document.getElementById('today-log'); tl.innerHTML='';
   const today=DB.entries.filter(e=>e.d===todayStr());
-  if(!today.length){ tl.innerHTML='<div style="padding:12px 4px;color:var(--amber-faint);font-size:17px">NO ENTRIES YET — LOG SOMETHING ABOVE<span class="cursor-blink"></span></div>'; }
-  today.slice().reverse().forEach(e=>{
-    const row=document.createElement('div'); row.className='entry';
-    row.innerHTML=`<span class="etime">${e.t}</span><span class="ename">${esc(e.n)}${e.q!==1?' ×'+e.q:''}</span><span class="evals">${e.c} cal · ${e.p}g P</span><span class="edel">✕</span>`;
-    row.querySelector('.edel').onclick=()=>delEntry(e.id);
-    tl.appendChild(row); });
+  document.getElementById('home-meal-count').textContent=today.length?today.length+' item'+(today.length===1?'':'s')+' logged':'';
+  document.getElementById('home-save-combo').classList.toggle('hidden',!today.length);
+  if(!today.length){ tl.innerHTML='<div class="home-empty"><strong>Your day starts here.</strong>Tap the yellow button to log your first food.</div>'; return; }
+  const groups=new Map();
+  today.forEach(e=>{const h=parseInt(e.t,10);const label=h<5?'Late night':h<12?'Morning':h<17?'Afternoon':'Evening';if(!groups.has(label))groups.set(label,[]);groups.get(label).push(e);});
+  for(const [label,items] of groups){
+    const group=document.createElement('section');group.className='meal-group';
+    const heading=document.createElement('div');heading.className='meal-group-head';
+    const title=document.createElement('span');title.textContent=label;heading.appendChild(title);
+    const add=document.createElement('button');add.textContent='＋';add.setAttribute('aria-label','Add food');add.onclick=openFoodSearch;heading.appendChild(add);group.appendChild(heading);
+    items.forEach(e=>{
+      const row=document.createElement('div'); row.className='entry';
+      row.innerHTML=`<span class="etime">${esc(e.t)}</span><span class="ename">${esc(e.n)}${e.q!==1?' ×'+e.q:''}</span><span class="evals">${e.c} cal<br>${e.p}g protein</span><button class="edel" aria-label="Remove food">✕</button>`;
+      row.querySelector('.edel').onclick=()=>delEntry(e.id);group.appendChild(row);
+    });
+    const subtotal=document.createElement('div');subtotal.className='meal-subtotal';
+    subtotal.textContent=Math.round(items.reduce((s,e)=>s+e.c,0))+' CAL · '+Math.round(items.reduce((s,e)=>s+e.p,0))+'g PROTEIN';
+    group.appendChild(subtotal);tl.appendChild(group);
+  }
+  const note=document.createElement('div');note.className='meal-subtotal';note.style.cssText='padding:0 16px 14px;font-weight:500';note.textContent='Grouped by log time';tl.appendChild(note);
 }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function delEntry(id){
@@ -619,10 +740,8 @@ function delEntry(id){
 // ============ MEAL COMBOS ============
 function renderCombos(){
   const box=document.getElementById('combo-chips'); box.innerHTML='';
-  if(!(DB.combos&&DB.combos.length)){
-    box.innerHTML='<div style="font-size:13px;color:var(--amber-faint);font-weight:700;padding:2px 0 6px">No combos yet — log a meal, then save it for 1-tap reuse.</div>';
-    return;
-  }
+  document.getElementById('home-combos').classList.toggle('hidden',!(DB.combos&&DB.combos.length));
+  if(!(DB.combos&&DB.combos.length)) return;
   DB.combos.forEach(cb=>{
     const chip=document.createElement('div'); chip.className='combo-chip';
     const total=cb.items.reduce((s,it)=>s+it.c,0);
@@ -728,7 +847,7 @@ function confirmAdd(){
   const now=new Date();
   DB.entries.push({id:Date.now()+Math.floor(Math.random()*10000),d:todayStr(),t:now.toTimeString().slice(0,5),n:f.n,q,c:Math.round(f.c*q),p:Math.round(f.p*q*10)/10});
   DB.recent=[f.id,...DB.recent.filter(x=>x!==f.id)].slice(0,8);
-  save(DB); closeSheet(); searchEl.value=''; renderResults(''); renderLog();
+  save(DB); closeSheet(); closeFoodSearch(); searchEl.value=''; renderResults(''); renderLog();
   toast(`LOGGED: ${Math.round(f.c*q)} CAL · ${(f.p*q).toFixed(0)}g P`);
 }
 // ============ TRENDS ============
