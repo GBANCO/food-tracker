@@ -191,6 +191,12 @@ textarea::placeholder { color:var(--faint); }
 .ci-btn.flag { color:var(--warn); }
 .ci-btn:active { transform:translate(2px,2px); box-shadow:none; }
 /* Home / bold & familiar */
+.home-topbar {display:flex;align-items:center;justify-content:space-between;margin:-7px 0 18px;min-height:44px;}
+.home-logo {font-size:24px;font-weight:950;letter-spacing:-1.3px;}
+.home-logo span {color:#d8a318;font-size:30px;vertical-align:-1px;}
+.home-menu {background:none;border:0;font-size:27px;letter-spacing:3px;font-weight:800;min-width:44px;min-height:44px;padding:0 2px 8px;}
+.home-menu:focus-visible {outline:2px solid var(--ink);outline-offset:2px;}
+.home-summary #c-track {margin-top:12px;}
 main {padding:calc(env(safe-area-inset-top) + 25px) 20px calc(104px + env(safe-area-inset-bottom));}
 #main>div {max-width:480px;margin:0 auto;}
 .panel {border-width:2px;box-shadow:3px 3px 0 var(--ink);}
@@ -256,6 +262,7 @@ nav button.active {background:var(--ink);color:var(--paper);}
   <main id="main">
     <!-- TAB: LOG -->
     <div id="tab-log">
+      <div class="home-topbar"><div class="home-logo"><span aria-hidden="true">ϟ</span> FUEL</div><button class="home-menu" onclick="openMoreMenu()" aria-label="Open more options" aria-haspopup="dialog">···</button></div>
       <section class="home-summary panel" aria-label="Daily nutrition totals">
         <div class="home-protein-head"><h2>PROTEIN</h2><span id="home-protein-goal"></span></div>
         <div class="home-protein-number"><strong id="home-protein-total">0<span>g</span></strong><span id="home-protein-left"></span></div>
@@ -263,7 +270,7 @@ nav button.active {background:var(--ink);color:var(--paper);}
         <div class="bar-track" id="p-track" role="progressbar" aria-label="Daily protein"><div class="bar-grad"></div><div class="bar-cover" id="p-cover"></div><div class="bar-edge" id="p-edge"></div></div>
         <div class="home-calories"><b>CALORIES</b><div><strong id="home-calorie-total">0</strong><span id="home-calorie-goal"></span></div></div>
         <span id="c-val" class="hidden"></span>
-        <div class="bar-track hidden" id="c-track"><div class="bar-grad"></div><div class="bar-cover" id="c-cover"></div><div class="bar-edge" id="c-edge"></div></div>
+        <div class="bar-track" id="c-track" role="progressbar" aria-label="Daily calories"><div class="bar-grad"></div><div class="bar-cover" id="c-cover"></div><div class="bar-edge" id="c-edge"></div></div>
         <p id="home-calorie-left" class="home-remaining"></p>
       </section>
       <button class="home-add btn block" onclick="openFoodSearch()"><span class="home-plus">＋</span><span>SEARCH / ADD FOOD</span><small>IU DINING + MORE ↗</small></button>
@@ -359,7 +366,7 @@ nav button.active {background:var(--ink);color:var(--paper);}
     <button id="nav-log" class="active" onclick="showTab('log')"><span class="nav-symbol" aria-hidden="true">⌂</span>TODAY</button>
     <button id="nav-trends" onclick="showTab('trends')"><span class="nav-symbol" aria-hidden="true">↗</span>TRENDS</button>
     <button id="nav-foods" onclick="showTab('foods')"><span class="nav-symbol" aria-hidden="true">▤</span>MY FOODS</button>
-    <button id="nav-community" onclick="openMoreMenu()"><span class="nav-symbol" aria-hidden="true">☷</span>MORE</button>
+    <button id="nav-community" onclick="showTab('community')"><span class="nav-symbol" aria-hidden="true">♧</span>COMMUNITY</button>
   </nav>
 </div>
 <div id="food-search-wrap" class="home-overlay" onclick="if(event.target===this)closeFoodSearch()">
@@ -578,7 +585,7 @@ function todayStr(off=0){ const dt=new Date(); dt.setDate(dt.getDate()+off); ret
 function baseCal(){ return (DB.settings&&DB.settings.calGoal)||2100; }
 function calGoal(){ return baseCal(); }
 function proGoal(){ return (DB.settings&&DB.settings.proGoal)||115; }
-const APP_VERSION='1.4.0';
+const APP_VERSION='1.4.1';
 // ============ CLOUD (Supabase) ============
 const SUPABASE_URL='https://oacrbrsqvsulhwgpqiqv.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hY3JicnNxdnN1bGh3Z3BxaXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzMzg5MDUsImV4cCI6MjEwNDkxNDkwNX0.99Fh1itRcPJ9HtRUO0Vo15N_UAYBTpWQtcElsPqkTxk';
@@ -681,6 +688,8 @@ function renderLog(){
   document.getElementById('home-calorie-left').textContent=t.c>cg?(t.c-cg).toLocaleString()+' cal above your daily target.':(cg-t.c).toLocaleString()+' cal left for the rest of your day.';
   const proteinTrack=document.getElementById('p-track');
   proteinTrack.setAttribute('aria-valuemin','0');proteinTrack.setAttribute('aria-valuemax',String(proGoal()));proteinTrack.setAttribute('aria-valuenow',String(Math.min(t.p,proGoal())));
+  const calorieTrack=document.getElementById('c-track');
+  calorieTrack.setAttribute('aria-valuemin','0');calorieTrack.setAttribute('aria-valuemax',String(cg));calorieTrack.setAttribute('aria-valuenow',String(Math.max(0,Math.min(t.c,cg))));
   // streak
   let streak=0;
   for(let i=0;i<365;i++){ const d=todayStr(-i); if(DB.entries.some(e=>e.d===d)) streak++; else if(i>0) break; }
